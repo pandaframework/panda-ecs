@@ -9,7 +9,7 @@ public abstract class AbstractIntervalSystem extends AbstractSystem {
     private final float interval;
     private float accumulator;
 
-    protected AbstractIntervalSystem(Aspect aspect, float interval) {
+    protected AbstractIntervalSystem(Aspect.Builder aspect, float interval) {
         super(aspect);
         this.interval = interval;
     }

@@ -12,7 +12,7 @@ public abstract class AbstractSystem implements EntitySubscription.Listener {
     private final EntitySubscription subscription;
     private boolean enabled;
 
-    protected AbstractSystem(Aspect aspect) {
+    protected AbstractSystem(Aspect.Builder aspect) {
         subscription = peer.getEntitySubscriptionManager().subscription(aspect);
         subscription.subscribe(this);
         enabled = true;
