@@ -1,0 +1,8 @@
+repositories {
+    mavenCentral()
+    maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
+}
+
+dependencies {
+    compile "io.spring.gradle:dependency-management-plugin:0.5.4.RELEASE"
+}
