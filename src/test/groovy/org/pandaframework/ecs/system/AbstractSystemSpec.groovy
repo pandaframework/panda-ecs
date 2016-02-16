@@ -13,7 +13,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 /**
  * @author Ranie Jade Ramiso
  */
-class SystemBasicSpec extends Specification {
+class AbstractSystemSpec extends Specification {
     def entitySubscriptionManager = Mock(EntitySubscriptionManager)
 
     def setup() {
