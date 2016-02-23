@@ -10,20 +10,21 @@ import org.pandaframework.ecs.util.collection.ImmutableIntBag;
  * @author Ranie Jade Ramiso
  */
 public abstract class AbstractSystem implements EntitySubscription.Listener {
-    private final EntitySubscription subscription;
-    private boolean enabled;
+    private final Aspect.Builder aspect;
+    private EntitySubscription subscription;
+    private boolean enabled = true;
+    private Peer peer;
 
     protected AbstractSystem(Aspect.Builder aspect) {
-        subscription = peer.getEntitySubscriptionManager().subscription(aspect);
-        subscription.subscribe(this);
-        enabled = true;
+        this.aspect = aspect;
     }
 
     public void initialize() {
-        // do nothing
+        subscription = peer.getEntitySubscriptionManager().subscription(aspect);
+        subscription.subscribe(this);
     }
 
-    public final void process(float delta) {
+    public /* non-final for testing purposes */ void process(float delta) {
         if (isEnabled() && canProcess(delta)) {
             subscription.entities()
                 .forEach(entity -> process(delta, entity));
@@ -61,14 +62,12 @@ public abstract class AbstractSystem implements EntitySubscription.Listener {
     protected abstract void process(float delta, int entity);
 
 
-    private static Peer peer;
-
     /**
      * @treatAsPrivate
      */
     @Deprecated
-    public static void impl_setPeer(Peer peer) {
-        AbstractSystem.peer = peer;
+    public void impl_setPeer(Peer peer) {
+        this.peer = peer;
     }
 
     /**

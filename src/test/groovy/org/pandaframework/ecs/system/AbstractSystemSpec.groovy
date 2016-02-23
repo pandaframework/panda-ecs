@@ -14,10 +14,11 @@ import java.util.concurrent.atomic.AtomicBoolean
  * @author Ranie Jade Ramiso
  */
 class AbstractSystemSpec extends Specification {
+    def peer
     def entitySubscriptionManager = Mock(EntitySubscriptionManager)
 
     def setup() {
-        AbstractSystem.impl_setPeer(new TestPeer(entitySubscriptionManager))
+        peer = new TestPeer(entitySubscriptionManager)
     }
 
     @Unroll
@@ -59,6 +60,8 @@ class AbstractSystemSpec extends Specification {
                     return canProcess;
                 }
             }
+
+            system.impl_setPeer(peer)
 
             system.initialize()
 

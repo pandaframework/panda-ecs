@@ -1,5 +1,6 @@
 package org.pandaframework.ecs.system
 
+import org.pandaframework.ecs.TestPeer
 import org.pandaframework.ecs.entity.Aspect
 import org.pandaframework.ecs.entity.EntitySubscription
 import org.pandaframework.ecs.entity.EntitySubscriptionManager
@@ -12,12 +13,11 @@ import java.util.concurrent.atomic.AtomicInteger
  * @author Ranie Jade Ramiso
  */
 class AbstractIntervalSystemSpec extends Specification {
-    def peer = Mock(AbstractSystem.Peer)
+    def peer
     def entitySubscriptionManager = Mock(EntitySubscriptionManager)
 
     def setup() {
-        AbstractSystem.impl_setPeer(peer)
-        peer.entitySubscriptionManager >> entitySubscriptionManager
+        peer = new TestPeer(entitySubscriptionManager)
     }
 
     def "should only be updated on specified interval"(float[] deltas, float interval, int updateCount) {
@@ -46,6 +46,10 @@ class AbstractIntervalSystemSpec extends Specification {
                     counter.getAndIncrement()
                 }
             }
+
+            system.impl_setPeer(peer)
+
+            system.initialize()
 
         when:
             deltas.each {
