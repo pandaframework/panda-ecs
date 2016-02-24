@@ -1,5 +1,4 @@
 apply from: "$rootDir/gradle/common/dependencies.gradle"
-apply from: "$rootDir/gradle/common/java.gradle"
 apply from: "$rootDir/gradle/common/kotlin.gradle"
 
 // FIXME: remove until https://youtrack.jetbrains.com/issue/KT-11174
@@ -9,6 +8,7 @@ buildscript {
     }
 
     dependencies {
+        classpath "io.spring.gradle:dependency-management-plugin:0.5.4.RELEASE"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.0.0"
     }
 }
