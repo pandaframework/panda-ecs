@@ -3,7 +3,7 @@ package org.pandaframework.ecs.entity
 /**
  * @author Ranie Jade Ramiso
  */
-class EntitySubscriptionManager {
+internal class EntitySubscriptionManager {
     fun entities(aspect: Aspect): EntitySubscription {
         throw UnsupportedOperationException()
     }
