@@ -5,4 +5,5 @@ repositories {
 
 dependencies {
     compile "io.spring.gradle:dependency-management-plugin:0.5.4.RELEASE"
+    compile "org.jetbrains.kotlin:kotlin-gradle-plugin:1.0.0"
 }

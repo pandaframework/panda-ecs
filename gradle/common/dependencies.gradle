@@ -12,5 +12,12 @@ dependencyManagement {
         dependency "org.objenesis:objenesis:2.1"
 
         dependency "com.google.guava:guava:19.0"
+        dependency "org.jetbrains.kotlin:kotlin-stdlib:1.0.0"
+
+        dependencySet(group: 'org.jetbrains.kotlin', version: '1.0.0') {
+            entry 'kotlin-std'
+            entry 'kotlin-reflect'
+            entry 'kotlin-test'
+        }
     }
 }
