@@ -30,6 +30,15 @@ internal class Bits private constructor(private val internal: BitSet) {
             }
         }
 
+        private fun set(bits: Bits, bit: Int, value: Boolean): Bits {
+            return compose {
+                it.or(bits.internal)
+                it.set(bit, value)
+            }
+        }
+
+        private fun get(bits: Bits, bit: Int): Boolean = bits.internal.get(bit)
+
         private fun compose(composer: (BitSet) -> Unit): Bits {
             builder.clear()
             composer(builder)
@@ -41,6 +50,12 @@ internal class Bits private constructor(private val internal: BitSet) {
     fun and(other: Bits): Bits = and(this, other)
 
     fun or(other: Bits): Bits = or(this, other)
+
+    fun set(bit: Int): Bits = set(this, bit, true)
+
+    fun set(bit: Int, value: Boolean): Bits = set(this, bit, value)
+
+    operator fun get(bit: Int): Boolean = get(this, bit)
 
     override fun equals(other: Any?): Boolean {
         if (this === other) {

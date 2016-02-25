@@ -10,15 +10,12 @@ import org.jetbrains.spek.api.shouldNotEqual
  */
 class IdentityFactorySpec : Spek() {
     init {
-        given ("BasicIdentityFactory") {
+        given ("a BasicIdentityFactory") {
             val identityFactory = IdentityFactories.basic()
-
             on("generate") {
-
                 it("should not return negative numbers") {
                     shouldBeTrue(identityFactory.generate() >= 0)
                 }
-
                 it("should be unique") {
                     val first = identityFactory.generate()
                     val second = identityFactory.generate()
@@ -27,30 +24,24 @@ class IdentityFactorySpec : Spek() {
             }
         }
 
-        given("RecyclingIdentityFactory") {
+        given("a RecyclingIdentityFactory") {
             val identityFactory = IdentityFactories.recycling()
-
             on("generate") {
-
                 it("should not return negative numbers") {
                     shouldBeTrue(identityFactory.generate() >= 0)
                 }
-
                 it("should be unique") {
                     val first = identityFactory.generate()
                     val second = identityFactory.generate()
                     shouldNotEqual(first, second)
                 }
             }
-
             on("free") {
-
                 it("should reuse the freed identity") {
                     val identity = identityFactory.generate()
                     identityFactory.free(identity)
                     shouldEqual(identity, identityFactory.generate())
                 }
-
                 it("should reuse the first freed identity") {
                     val identity1 = identityFactory.generate()
                     val identity2 = identityFactory.generate()
@@ -60,7 +51,6 @@ class IdentityFactorySpec : Spek() {
 
                     shouldEqual(identity1, identityFactory.generate())
                 }
-
             }
         }
     }
