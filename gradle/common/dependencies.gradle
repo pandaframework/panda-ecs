@@ -13,6 +13,7 @@ dependencyManagement {
 
         dependency "com.google.guava:guava:19.0"
         dependency "org.jetbrains.kotlin:kotlin-stdlib:1.0.0"
+        dependency "org.jetbrains.spek:spek:0.1.195"
 
         dependencySet(group: 'org.jetbrains.kotlin', version: '1.0.0') {
             entry 'kotlin-std'
