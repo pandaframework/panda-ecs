@@ -15,3 +15,14 @@ dependencies {
     testCompile "org.jetbrains.kotlin:kotlin-test"
     testCompile "org.jetbrains.spek:spek"
 }
+
+jacocoTestReport {
+    reports {
+        xml.enabled true
+    }
+}
+
+
+check {
+    dependsOn jacocoTestReport
+}
