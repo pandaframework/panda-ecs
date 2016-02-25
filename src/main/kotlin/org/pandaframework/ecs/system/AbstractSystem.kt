@@ -8,7 +8,7 @@ import org.pandaframework.ecs.entity.EntitySubscription
  * @author Ranie Jade Ramiso
  */
 abstract class AbstractSystem protected constructor(val aspect: Aspect): EntitySubscription.Listener {
-    var enabled: Boolean = false
+    var enabled: Boolean = true
         protected set
 
     private lateinit var subscription: EntitySubscription
@@ -18,7 +18,7 @@ abstract class AbstractSystem protected constructor(val aspect: Aspect): EntityS
         subscription = world.entitySubscriptionManager.entities(aspect)
     }
 
-    fun process(delta: Float) {
+    internal open fun process(delta: Float) {
         subscription.entities().forEach {
             process(it, delta)
         }
@@ -29,13 +29,9 @@ abstract class AbstractSystem protected constructor(val aspect: Aspect): EntityS
 
     open fun canProcess(delta: Float): Boolean = true
 
-    override fun inserted(entities: Set<Int>) {
-        throw UnsupportedOperationException()
-    }
+    override fun inserted(entities: Set<Int>) {}
 
-    override fun removed(entities: Set<Int>) {
-        throw UnsupportedOperationException()
-    }
+    override fun removed(entities: Set<Int>) {}
 
     protected abstract fun process(entity: Int, delta: Float)
 }

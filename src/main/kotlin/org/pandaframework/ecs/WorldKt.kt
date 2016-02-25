@@ -15,10 +15,10 @@ fun worldConfig(init: WorldConfig.() -> Unit): WorldConfig {
 }
 
 class WorldConfig internal constructor() {
-    internal  val systems: MutableList<KClass<AbstractSystem>> = mutableListOf()
+    internal  val systems: MutableList<KClass<out AbstractSystem>> = mutableListOf()
 
     inner class SystemBuilder internal constructor() {
-        operator fun KClass<AbstractSystem>.unaryPlus(){
+        operator fun KClass<out AbstractSystem>.unaryPlus(){
             if (!isValidSystem(this)) {
                 throw IllegalArgumentException("Invalid primary constructor.");
             }
@@ -28,11 +28,10 @@ class WorldConfig internal constructor() {
             }
         }
 
-        private fun isValidSystem(cls: KClass<AbstractSystem>): Boolean {
+        private fun isValidSystem(cls: KClass<out AbstractSystem>): Boolean {
             val primaryConstructor = cls.primaryConstructor
             return primaryConstructor != null
-                    && primaryConstructor.parameters.isNotEmpty()
-                    && primaryConstructor.isAccessible
+                    && primaryConstructor.parameters.isEmpty()
         }
     }
 
@@ -47,15 +46,14 @@ class WorldConfig internal constructor() {
 /**
  * @author Ranie Jade Ramiso
  */
-class World constructor(config: WorldConfig) {
-    internal lateinit var entitySubscriptionManager: EntitySubscriptionManager
+class World constructor(config: WorldConfig = worldConfig {}) {
+    internal val entitySubscriptionManager: EntitySubscriptionManager = EntitySubscriptionManager()
+    internal lateinit var systemInstances: List<AbstractSystem>
 
-    val systems: List<KClass<AbstractSystem>> = config.systems
+    val systems: List<KClass<out AbstractSystem>> = config.systems
 
     var initialized: Boolean = false
         private set
-
-    private lateinit var systemInstances: List<AbstractSystem>
 
     fun initialize() {
         try {
@@ -78,9 +76,15 @@ class World constructor(config: WorldConfig) {
     }
 
     fun update(delta: Float) {
+        require(delta > 0)
+        assertInitialized()
+
         try {
             systemInstances.forEach {
-                it.process(delta)
+
+                if (it.enabled && it.canProcess(delta)) {
+                    it.process(delta)
+                }
             }
         } catch (e: Throwable) {
             throw WorldException(e);
@@ -88,6 +92,7 @@ class World constructor(config: WorldConfig) {
     }
 
     fun destroy() {
+        assertInitialized()
         try {
             systemInstances.forEach {
                 it.destroy()
@@ -96,6 +101,12 @@ class World constructor(config: WorldConfig) {
             initialized = false
         } catch (e: Throwable) {
             throw WorldException(e)
+        }
+    }
+
+    private fun assertInitialized() {
+        if (!initialized) {
+            error("World must be initialized first")
         }
     }
 }
