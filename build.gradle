@@ -1,3 +1,5 @@
+version = "0.1.0-SNAPSHOT"
+
 apply from: "$rootDir/gradle/common/dependencies.gradle"
 apply from: "$rootDir/gradle/common/kotlin.gradle"
 
@@ -10,11 +12,18 @@ buildscript {
 
     dependencies {
         classpath "io.spring.gradle:dependency-management-plugin:0.5.4.RELEASE"
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.0.0"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.0.1"
         classpath "org.jetbrains.dokka:dokka-gradle-plugin:0.9.7"
     }
 }
 
 dependencies {
     compile "com.google.guava:guava"
+    compile "org.jetbrains.kotlin:kotlin-reflect"
+    compile "org.jetbrains.kotlin:kotlin-stdlib"
+
+    testCompile 'junit:junit'
+    testCompile 'com.natpryce:hamkrest'
+    testCompile 'io.polymorphicpanda.kspec:kspec-core'
+    testCompile 'io.polymorphicpanda.kspec:kspec-junit-runner'
 }

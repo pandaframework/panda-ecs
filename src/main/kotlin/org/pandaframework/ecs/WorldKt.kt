@@ -2,9 +2,9 @@ package org.pandaframework.ecs
 
 import org.pandaframework.ecs.entity.EntitySubscriptionManager
 import org.pandaframework.ecs.system.AbstractSystem
+import java.util.*
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
-import kotlin.reflect.jvm.isAccessible
 import kotlin.reflect.primaryConstructor
 
 
@@ -48,7 +48,7 @@ class WorldConfig internal constructor() {
  */
 class World constructor(config: WorldConfig = worldConfig {}) {
     internal val entitySubscriptionManager: EntitySubscriptionManager = EntitySubscriptionManager()
-    internal lateinit var systemInstances: List<AbstractSystem>
+    internal val systemInstances = LinkedList<AbstractSystem>()
 
     val systems: List<KClass<out AbstractSystem>> = config.systems
 
@@ -57,9 +57,9 @@ class World constructor(config: WorldConfig = worldConfig {}) {
 
     fun initialize() {
         try {
-            systemInstances = systems.map {
+            systemInstances.addAll(systems.map {
                 (it.primaryConstructor as KFunction<AbstractSystem>).call()
-            }
+            })
 
             systemInstances.forEach {
                 it.world = this

@@ -1,55 +1,64 @@
 package org.pandaframework.ecs.util.identity
 
-import org.jetbrains.spek.api.Spek
-import org.jetbrains.spek.api.shouldBeTrue
-import org.jetbrains.spek.api.shouldEqual
-import org.jetbrains.spek.api.shouldNotEqual
+import com.natpryce.hamkrest.assertion.assertThat
+import com.natpryce.hamkrest.equalTo
+import com.natpryce.hamkrest.greaterThan
+import com.natpryce.hamkrest.greaterThanOrEqualTo
+import io.polymorphicpanda.kspec.*
+import io.polymorphicpanda.kspec.junit.JUnitKSpecRunner
+import org.junit.runner.RunWith
 
 /**
  * @author Ranie Jade Ramiso
  */
-class IdentityFactorySpec : Spek() {
-    init {
-        given ("a BasicIdentityFactory") {
-            val identityFactory = IdentityFactories.basic()
-            on("generate") {
-                it("should not return negative numbers") {
-                    shouldBeTrue(identityFactory.generate() >= 0)
+@RunWith(JUnitKSpecRunner::class)
+class IdentityFactorySpec : KSpec() {
+    override fun spec() {
+        describe(IdentityFactory::class) {
+            subject {
+                return@subject IdentityFactories.basic()
+            }
+
+            itBehavesLike(identityFactory())
+        }
+
+        describe(RecyclingIdentityFactory::class) {
+            subject {
+                return@subject IdentityFactories.recycling()
+            }
+
+            itBehavesLike(identityFactory())
+
+            describe("free") {
+                it("should reuse the freed identity") {
+                    val identity = subject.generate()
+                    subject.free(identity)
+                    assertThat(identity, equalTo(subject.generate()))
                 }
-                it("should be unique") {
-                    val first = identityFactory.generate()
-                    val second = identityFactory.generate()
-                    shouldNotEqual(first, second)
+                it("should reuse the first freed identity") {
+                    val identity1 = subject.generate()
+                    val identity2 = subject.generate()
+
+                    subject.free(identity1)
+                    subject.free(identity2)
+
+                    assertThat(identity1, equalTo(subject.generate()))
                 }
             }
         }
+    }
 
-        given("a RecyclingIdentityFactory") {
-            val identityFactory = IdentityFactories.recycling()
-            on("generate") {
+    companion object {
+        fun identityFactory() = sharedExample<IdentityFactory> {
+            describe("generate") {
                 it("should not return negative numbers") {
-                    shouldBeTrue(identityFactory.generate() >= 0)
+                    assertThat(subject.generate(), greaterThanOrEqualTo(0))
                 }
-                it("should be unique") {
-                    val first = identityFactory.generate()
-                    val second = identityFactory.generate()
-                    shouldNotEqual(first, second)
-                }
-            }
-            on("free") {
-                it("should reuse the freed identity") {
-                    val identity = identityFactory.generate()
-                    identityFactory.free(identity)
-                    shouldEqual(identity, identityFactory.generate())
-                }
-                it("should reuse the first freed identity") {
-                    val identity1 = identityFactory.generate()
-                    val identity2 = identityFactory.generate()
 
-                    identityFactory.free(identity1)
-                    identityFactory.free(identity2)
-
-                    shouldEqual(identity1, identityFactory.generate())
+                it("should generate unique ids") {
+                    val first = subject.generate()
+                    val second = subject.generate()
+                    assertThat(first, !equalTo(second))
                 }
             }
         }

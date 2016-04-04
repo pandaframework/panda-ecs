@@ -5,7 +5,7 @@ import java.util.*
 /**
  * @author Ranie Jade Ramiso
  */
-internal class Bits private constructor(private val internal: BitSet) {
+class Bits private constructor(private val internal: BitSet) {
 
     companion object {
         private val builder = BitSet()

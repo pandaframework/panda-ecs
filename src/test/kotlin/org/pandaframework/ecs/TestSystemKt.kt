@@ -1,4 +1,4 @@
-package org.pandaframework.ecs.util.org.pandaframework.ecs
+package org.pandaframework.ecs
 
 import org.pandaframework.ecs.entity.aspect
 import org.pandaframework.ecs.system.AbstractSystem

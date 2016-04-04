@@ -1,70 +1,76 @@
 package org.pandaframework.ecs.util.bits
 
-import org.jetbrains.spek.api.*
+import com.natpryce.hamkrest.assertion.assertThat
+import com.natpryce.hamkrest.equalTo
+import com.natpryce.hamkrest.sameInstance
+import io.polymorphicpanda.kspec.KSpec
+import io.polymorphicpanda.kspec.describe
+import io.polymorphicpanda.kspec.it
+import io.polymorphicpanda.kspec.junit.JUnitKSpecRunner
+import org.junit.runner.RunWith
 
 /**
  * @author Ranie Jade Ramiso
  */
-class BitsSpec: Spek() {
-    init {
-        given("a Bits") {
-            on("creation") {
+@RunWith(JUnitKSpecRunner::class)
+class BitsSpec: KSpec() {
+    override fun spec() {
+        describe("Bits") {
+            describe("creation") {
                 it("should return the same instance") {
-                    shouldBeTrue(Bits() === Bits())
+                    assertThat(Bits(), sameInstance(Bits()))
                 }
             }
 
-            on("set") {
+            describe("set") {
                 it("should return the same instance") {
-                    shouldEqual(Bits().set(0), Bits().set(0))
-                    shouldEqual(Bits().set(1), Bits().set(1))
+                    assertThat(Bits().set(0), sameInstance(Bits().set(0)))
+                    assertThat(Bits().set(1), sameInstance(Bits().set(1)))
+                    assertThat(Bits().set(1), !sameInstance(Bits().set(0)))
                 }
                 it("should set the bit to the specified value") {
-                    shouldBeTrue(Bits().set(0)[0])
-                    shouldBeTrue(Bits().set(1)[1])
-                    shouldBeFalse(Bits().set(1)[0])
-
-                    val bits = Bits().set(1)
-                    shouldBeFalse(bits.set(0, false)[0])
+                    assertThat(Bits().set(0)[0], equalTo(true))
+                    assertThat(Bits().set(1)[1], equalTo(true))
+                    assertThat(Bits().set(1)[0], equalTo(false))
                 }
                 it("should not modify original") {
                     val bits = Bits()
-                    shouldNotEqual(bits, bits.set(0))
+                    assertThat(bits, !equalTo(bits.set(0)))
                 }
             }
 
-            on("and") {
+            describe("and") {
                 it("should return the same instance") {
                     var first = Bits().set(0)
                     var second = Bits().set(1)
-                    shouldEqual(first.and(second), first.and(second))
+                    assertThat(first.and(second), sameInstance(first.and(second)))
                 }
                 it("should perform logical and") {
                     val expected = Bits()
-                        .set(1)
+                            .set(1)
 
                     val first = Bits()
-                        .set(0)
-                        .set(1)
+                            .set(0)
+                            .set(1)
                     val second = Bits()
                             .set(1)
                             .set(1)
 
-                    shouldEqual(expected, first.and(second))
+                    assertThat(expected, sameInstance(first.and(second)))
                 }
                 it("should not modify original") {
                     val bits = Bits().set(0)
-                    shouldNotEqual(bits, bits.and(Bits()))
+                    assertThat(bits, !equalTo(bits.and(Bits())))
                 }
             }
 
-            on("or") {
+            describe("or") {
                 it("should return the same instance") {
                     var first = Bits().set(0)
                     var second = Bits().set(1)
-                    shouldEqual(first.or(second), first.or(second))
+                    assertThat(first.or(second), sameInstance(first.or(second)))
                 }
-                it("should perform logical and") {
+                it("should perform logical or") {
                     val expected = Bits()
                             .set(0)
                             .set(1)
@@ -76,11 +82,11 @@ class BitsSpec: Spek() {
                             .set(1)
                             .set(1)
 
-                    shouldEqual(expected, first.or(second))
+                    assertThat(expected, sameInstance(first.or(second)))
                 }
                 it("should not modify original") {
                     val bits = Bits().set(0)
-                    shouldNotEqual(bits, bits.or(Bits().set(1)))
+                    assertThat(bits, !equalTo(bits.or(Bits().set(1))))
                 }
             }
         }

@@ -5,11 +5,11 @@ import java.util.*
 /**
  * @author Ranie Jade Ramiso
  */
-internal interface IdentityFactory {
+interface IdentityFactory {
     fun generate(): Int
 }
 
-internal object IdentityFactories {
+object IdentityFactories {
     fun basic(): IdentityFactory {
         return BasicIdentityFactory()
     }
@@ -19,9 +19,9 @@ internal object IdentityFactories {
     }
 }
 
-internal open class ForwardingIdentityFactory (delegate: IdentityFactory): IdentityFactory by delegate
+open class ForwardingIdentityFactory (delegate: IdentityFactory): IdentityFactory by delegate
 
-internal class RecyclingIdentityFactory (delegate: IdentityFactory): ForwardingIdentityFactory(delegate) {
+class RecyclingIdentityFactory (delegate: IdentityFactory): ForwardingIdentityFactory(delegate) {
     private val recycled: BitSet = BitSet()
     private val limbo: MutableList<Int> = mutableListOf()
 
@@ -40,7 +40,7 @@ internal class RecyclingIdentityFactory (delegate: IdentityFactory): ForwardingI
     }
 }
 
-internal  class BasicIdentityFactory: IdentityFactory {
+class BasicIdentityFactory: IdentityFactory {
     private var identityCount = 0
 
     override fun generate(): Int {
