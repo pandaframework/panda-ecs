@@ -3,6 +3,8 @@ package org.pandaframework.ecs.util
 import java.util.*
 
 /**
+ * A memory efficient wrapper for [java.util.BitSet].
+ *
  * @author Ranie Jade Ramiso
  */
 class Bits private constructor(private val internal: BitSet) {

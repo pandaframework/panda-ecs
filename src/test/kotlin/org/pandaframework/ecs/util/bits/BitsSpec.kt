@@ -42,8 +42,8 @@ class BitsSpec: KSpec() {
 
             describe("and") {
                 it("should return the same instance") {
-                    var first = Bits().set(0)
-                    var second = Bits().set(1)
+                    val first = Bits().set(0)
+                    val second = Bits().set(1)
                     assertThat(first.and(second), sameInstance(first.and(second)))
                 }
                 it("should perform logical and") {
@@ -67,8 +67,8 @@ class BitsSpec: KSpec() {
 
             describe("or") {
                 it("should return the same instance") {
-                    var first = Bits().set(0)
-                    var second = Bits().set(1)
+                    val first = Bits().set(0)
+                    val second = Bits().set(1)
                     assertThat(first.or(second), sameInstance(first.or(second)))
                 }
                 it("should perform logical or") {
