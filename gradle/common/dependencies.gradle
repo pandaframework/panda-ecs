@@ -15,12 +15,12 @@ dependencyManagement {
         dependency "com.google.guava:guava:19.0"
         dependency "com.natpryce:hamkrest:1.1.0.0"
 
-        dependencySet(group: 'io.polymorphicpanda.kspec', version: '0.1.0') {
+        dependencySet(group: 'io.polymorphicpanda.kspec', version: '0.4.0') {
             entry 'kspec-core'
             entry 'kspec-junit-runner'
         }
 
-        dependencySet(group: 'org.jetbrains.kotlin', version: '1.0.1') {
+        dependencySet(group: 'org.jetbrains.kotlin', version: "$kotlinVersion") {
             entry 'kotlin-stdlib'
             entry 'kotlin-reflect'
             entry 'kotlin-test'
