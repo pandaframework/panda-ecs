@@ -1,4 +1,4 @@
-package org.pandaframework.ecs.system
+package org.pandaframework.ecs.entity
 
 import org.pandaframework.ecs.component.Component
 import org.pandaframework.ecs.util.Bits
@@ -12,10 +12,7 @@ interface Aspect {
     fun any(vararg components: KClass<out Component>)
     fun exclude(vararg components: KClass<out Component>)
 
-
-    fun matcher(): Matcher
-
-    interface Matcher {
-        fun matches(composition: Bits): Boolean
-    }
+    val allBits: Bits
+    val anyBits: Bits
+    val excludeBits: Bits
 }

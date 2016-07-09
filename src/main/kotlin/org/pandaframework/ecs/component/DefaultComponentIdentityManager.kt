@@ -8,7 +8,7 @@ import kotlin.reflect.KClass
 /**
  * @author Ranie Jade Ramiso
  */
-class DefaultComponentIdentityManager: ComponentIdentityManager {
+internal class DefaultComponentIdentityManager: ComponentIdentityManager {
     private val identityFactory = IdentityFactories.basic()
     private val identityMap = HashMap<KClass<out Component>, Bits>()
 

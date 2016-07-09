@@ -1,7 +1,8 @@
-package org.pandaframework.ecs.system
+package org.pandaframework.ecs.entity
 
 import org.pandaframework.ecs.component.Component
 import org.pandaframework.ecs.component.ComponentIdentityManager
+import org.pandaframework.ecs.system.AbstractSystem
 import org.pandaframework.ecs.util.Bits
 import java.util.*
 import kotlin.reflect.KClass
@@ -9,7 +10,7 @@ import kotlin.reflect.KClass
 /**
  * @author Ranie Jade Ramiso
  */
-class DefaultAspectManager(val componentIdentityManager: ComponentIdentityManager): AspectManager {
+internal class DefaultAspectManager(val componentIdentityManager: ComponentIdentityManager): AspectManager {
     val aspectMap = HashMap<KClass<out AbstractSystem>, Aspect>()
 
     override fun aspectFor(system: KClass<out AbstractSystem>): Aspect {
@@ -18,41 +19,36 @@ class DefaultAspectManager(val componentIdentityManager: ComponentIdentityManage
 
 
     inner class AspectImpl: Aspect {
-        var allBits = Bits()
-        var anyBits = Bits()
-        var excludeBits = Bits()
+        override val allBits: Bits
+            get() = _allBits
+        override val anyBits: Bits
+            get() = _anyBits
+        override val excludeBits: Bits
+            get() = _excludeBits
 
-        val matcher = object: Aspect.Matcher {
-            override fun matches(composition: Bits): Boolean {
-                return composition.and(allBits) == allBits
-                    && composition.and(anyBits) != Bits()
-                    && composition.and(excludeBits) == Bits()
-            }
-
-        }
+        var _allBits = Bits()
+        var _anyBits = Bits()
+        var _excludeBits = Bits()
 
         override fun all(vararg components: KClass<out Component>) {
             components.map { componentIdentityManager.getIdentity(it) }
                 .forEach {
-                    allBits = allBits.or(it)
+                    _allBits = _allBits.or(it)
                 }
         }
 
         override fun any(vararg components: KClass<out Component>) {
             components.map { componentIdentityManager.getIdentity(it) }
                 .forEach {
-                    anyBits = anyBits.or(it)
+                    _anyBits = _anyBits.or(it)
                 }
         }
 
         override fun exclude(vararg components: KClass<out Component>) {
             components.map { componentIdentityManager.getIdentity(it) }
                 .forEach {
-                    excludeBits = excludeBits.or(it)
+                    _excludeBits = excludeBits.or(it)
                 }
         }
-
-        override fun matcher() = matcher
-
     }
 }

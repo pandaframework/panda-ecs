@@ -6,6 +6,6 @@ import kotlin.reflect.KClass
 /**
  * @author Ranie Jade Ramiso
  */
-interface ComponentIdentityManager {
+internal interface ComponentIdentityManager {
     fun getIdentity(component: KClass<out Component>): Bits
 }
