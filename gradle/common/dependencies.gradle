@@ -15,9 +15,15 @@ dependencyManagement {
         dependency "com.google.guava:guava:19.0"
         dependency "com.natpryce:hamkrest:1.1.0.0"
 
-        dependencySet(group: 'io.polymorphicpanda.kspec', version: '0.4.0') {
-            entry 'kspec-core'
-            entry 'kspec-junit-runner'
+        dependencySet(group: 'org.junit.platform', version: '1.0.0-M1') {
+            entry 'junit-platform-engine'
+            entry 'junit-platform-runner'
+            entry 'junit-platform-launcher'
+        }
+
+        dependencySet(group: 'org.jetbrains.spek', version: '1.0.0-SNAPSHOT') {
+            entry 'spek-api'
+            entry 'spek-junit-engine'
         }
 
         dependencySet(group: 'org.jetbrains.kotlin', version: "$kotlinVersion") {

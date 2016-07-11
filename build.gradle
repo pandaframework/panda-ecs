@@ -1,5 +1,7 @@
 version = "0.1.0-SNAPSHOT"
 
+apply plugin: 'org.junit.platform.gradle.plugin'
+
 apply from: "$rootDir/gradle/common/dependencies.gradle"
 apply from: "$rootDir/gradle/common/kotlin.gradle"
 
@@ -14,6 +16,13 @@ buildscript {
         classpath "io.spring.gradle:dependency-management-plugin:0.5.4.RELEASE"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
         classpath "org.jetbrains.dokka:dokka-gradle-plugin:0.9.8"
+        classpath 'org.junit.platform:junit-platform-gradle-plugin:1.0.0-M1'
+    }
+}
+
+junitPlatform {
+    engines {
+        include 'spek'
     }
 }
 
@@ -21,11 +30,15 @@ dependencies {
     compile "com.google.guava:guava"
     compile "org.jetbrains.kotlin:kotlin-reflect"
     compile "org.jetbrains.kotlin:kotlin-stdlib"
+    compile "org.jetbrains.kotlin:kotlin-test"
 
-    testCompile 'junit:junit'
     testCompile 'com.natpryce:hamkrest'
-    testCompile 'io.polymorphicpanda.kspec:kspec-core'
-    testCompile 'io.polymorphicpanda.kspec:kspec-junit-runner'
+
+    testCompile 'org.jetbrains.spek:spek-api'
+    testRuntime 'org.jetbrains.spek:spek-junit-engine'
+
+
+    testCompile 'org.junit.platform:junit-platform-runner'
 }
 
 task wrapper(type: Wrapper) {

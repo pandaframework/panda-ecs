@@ -1,9 +1,17 @@
 package org.pandaframework.ecs.entity
 
+import org.pandaframework.ecs.util.IntBag
+import org.pandaframework.ecs.util.identity.IdentityFactories
+import java.util.*
+
 /**
  * @author Ranie Jade Ramiso
  */
-internal class DefaultEntitySubscriptionManager: EntitySubscriptionManager {
+class DefaultEntitySubscriptionManager: EntitySubscriptionManager {
+    val identityFactory = IdentityFactories.recycling()
+    val entities = IntBag()
+    val aspects = HashMap<AspectImpl, IntBag>()
+
     override fun subscribe(aspect: Aspect): EntitySubscription {
         TODO()
     }

@@ -11,8 +11,4 @@ interface Aspect {
     fun all(vararg components: KClass<out Component>)
     fun any(vararg components: KClass<out Component>)
     fun exclude(vararg components: KClass<out Component>)
-
-    val allBits: Bits
-    val anyBits: Bits
-    val excludeBits: Bits
 }
