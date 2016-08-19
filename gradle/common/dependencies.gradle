@@ -4,7 +4,7 @@ dependencyManagement {
     dependencies {
         dependency "com.natpryce:hamkrest:1.1.0.0"
 
-        dependencySet(group: 'org.junit.platform', version: '1.0.0-M1') {
+        dependencySet(group: 'org.junit.platform', version: '1.0.0-M2') {
             entry 'junit-platform-engine'
             entry 'junit-platform-runner'
             entry 'junit-platform-launcher'
@@ -12,7 +12,7 @@ dependencyManagement {
 
         dependencySet(group: 'org.jetbrains.spek', version: '1.0.0-SNAPSHOT') {
             entry 'spek-api'
-            entry 'spek-junit-engine'
+            entry 'spek-junit-platform-engine'
         }
 
         dependencySet(group: 'org.jetbrains.kotlin', version: "$kotlinVersion") {

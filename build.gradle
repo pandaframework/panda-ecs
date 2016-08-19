@@ -32,7 +32,7 @@ dependencies {
     testCompile 'com.natpryce:hamkrest'
 
     testCompile 'org.jetbrains.spek:spek-api'
-    testRuntime 'org.jetbrains.spek:spek-junit-engine'
+    testRuntime 'org.jetbrains.spek:spek-junit-platform-engine'
 
     // temporary for IDE quick run via @RunWith(JUnitPlatform::class)
     testCompile 'org.junit.platform:junit-platform-runner'
