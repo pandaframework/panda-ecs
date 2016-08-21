@@ -6,9 +6,9 @@ import com.natpryce.hamkrest.equalTo
 import com.natpryce.hamkrest.present
 import com.natpryce.hamkrest.throws
 import org.jetbrains.spek.api.SubjectSpek
-import org.jetbrains.spek.api.dsl.context
 import org.jetbrains.spek.api.dsl.describe
 import org.jetbrains.spek.api.dsl.it
+import org.jetbrains.spek.api.dsl.on
 
 /**
  * @author Ranie Jade Ramiso
@@ -18,7 +18,7 @@ class BagSpec: SubjectSpek<Bag<Int>>({
 
     describe("insertion") {
 
-        context("inserting an item") {
+        on("inserting an item") {
             beforeEach {
                 subject[0] = 3
             }
@@ -32,7 +32,7 @@ class BagSpec: SubjectSpek<Bag<Int>>({
             }
         }
 
-        context("insertion beyond capacity") {
+        on("insertion beyond capacity") {
             beforeEach {
                 subject[1] = 4
             }
@@ -54,7 +54,7 @@ class BagSpec: SubjectSpek<Bag<Int>>({
             subject[2] = 3
         }
 
-        context("removing an item") {
+        on("removing an item") {
             beforeEach {
                 subject.remove(0)
             }
