@@ -4,7 +4,7 @@ package org.pandaframework.ecs.util
  * @author Ranie Jade Ramiso
  */
 class Bag<T> constructor() {
-    private var buffer = arrayOfNulls<Any>(1)
+    private var buffer = arrayOfNulls<Any>(0)
 
     val size: Int
         get() = buffer.size
@@ -20,11 +20,11 @@ class Bag<T> constructor() {
         put(index, value)
     }
 
-    operator fun get(index: Int): T {
+    operator fun get(index: Int): T? {
         if (index > buffer.lastIndex) {
             throw IndexOutOfBoundsException()
         }
-        return (buffer[index] as T?)!!
+        return (buffer[index] as T?)
     }
 
     fun remove(index: Int) {

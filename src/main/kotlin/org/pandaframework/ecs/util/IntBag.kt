@@ -6,7 +6,7 @@ import java.util.*
  * @author Ranie Jade Ramiso
  */
 class IntBag {
-    private var buffer = IntArray(1)
+    private var buffer = IntArray(0)
     private val emptyIndexes = HashSet<Int>()
 
     val size: Int
@@ -35,9 +35,16 @@ class IntBag {
         if (index > buffer.lastIndex) {
             throw IndexOutOfBoundsException()
         }
-        buffer[index] = Int.MIN_VALUE
         emptyIndexes.add(index)
     }
+
+    fun isEmpty(index: Int): Boolean {
+        if (index > buffer.lastIndex) {
+            throw IndexOutOfBoundsException()
+        }
+        return emptyIndexes.contains(index)
+    }
+
     private fun ensureCapacity(size: Int) {
         if (size > buffer.size) {
             (buffer.lastIndex..(size - 1)).forEach { emptyIndexes.add(it) }
