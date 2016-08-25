@@ -8,7 +8,7 @@ import kotlin.reflect.KClass
  * @author Ranie Jade Ramiso
  */
 interface Aspect {
-    fun all(vararg components: KClass<out Component>)
-    fun any(vararg components: KClass<out Component>)
-    fun exclude(vararg components: KClass<out Component>)
+    fun all(vararg components: KClass<out Component>): Aspect
+    fun any(vararg components: KClass<out Component>): Aspect
+    fun exclude(vararg components: KClass<out Component>): Aspect
 }

@@ -17,24 +17,37 @@ class AspectImpl(private val componentIdentityManager: ComponentIdentityManager)
     private var _anyBits = Bits()
     private var _excludeBits = Bits()
 
-    override fun all(vararg components: KClass<out Component>) {
+    override fun all(vararg components: KClass<out Component>): Aspect {
         components.map { componentIdentityManager.getIdentity(it) }
             .forEach {
                 _allBits = _allBits.or(it)
             }
+
+        return this
     }
 
-    override fun any(vararg components: KClass<out Component>) {
+    override fun any(vararg components: KClass<out Component>): Aspect {
         components.map { componentIdentityManager.getIdentity(it) }
             .forEach {
                 _anyBits = _anyBits.or(it)
             }
+
+        return this
     }
 
-    override fun exclude(vararg components: KClass<out Component>) {
+    override fun exclude(vararg components: KClass<out Component>): Aspect {
         components.map { componentIdentityManager.getIdentity(it) }
             .forEach {
                 _excludeBits = _excludeBits.or(it)
             }
+
+        return this
+    }
+
+
+    fun match(bits: Bits): Boolean {
+        return bits.and(allBits) == allBits &&
+            bits.and(anyBits) != Bits() &&
+            bits.and(excludeBits) == Bits()
     }
 }

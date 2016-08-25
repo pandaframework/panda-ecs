@@ -75,9 +75,21 @@ class BagSpec: SubjectSpek<Bag<Int>>({
         }
     }
 
-    it("should throw an exception if accessing an empty index") {
-        assertThat({
-            subject[0]
-        }, throws<IndexOutOfBoundsException>())
+    describe("isPresent") {
+        beforeEach {
+            subject[0] = 1
+        }
+
+        it("should return true if value is present") {
+            assertThat(subject.isPresent(0), equalTo(true))
+        }
+
+        it("should return false if value is not present") {
+            assertThat(subject.isPresent(1), equalTo(false))
+        }
+    }
+
+    it("should return null if accessing an empty index") {
+        assertThat(subject[0], absent())
     }
 })

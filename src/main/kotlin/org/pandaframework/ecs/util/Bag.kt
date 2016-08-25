@@ -22,9 +22,13 @@ class Bag<T> constructor() {
 
     operator fun get(index: Int): T? {
         if (index > buffer.lastIndex) {
-            throw IndexOutOfBoundsException()
+            return null
         }
-        return (buffer[index] as T?)
+        return buffer[index] as T?
+    }
+
+    fun isPresent(index: Int): Boolean {
+        return get(index) != null
     }
 
     fun remove(index: Int) {

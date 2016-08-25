@@ -1,8 +1,8 @@
 package org.pandaframework.ecs
 
 import org.pandaframework.ecs.component.DefaultComponentIdentityManager
+import org.pandaframework.ecs.entity.DefaultEntitySubscriptionManager
 import org.pandaframework.ecs.system.AbstractSystem
-import org.pandaframework.ecs.entity.DefaultAspectManager
 import java.util.*
 import kotlin.reflect.KClass
 import kotlin.reflect.primaryConstructor
@@ -13,7 +13,7 @@ import kotlin.reflect.primaryConstructor
 class World private constructor(val systems: LinkedList<KClass<out AbstractSystem>>) {
     private val systemInstances = LinkedList<AbstractSystem>()
     private val componentIdentityManager = DefaultComponentIdentityManager()
-    private val aspectManager = DefaultAspectManager(componentIdentityManager)
+    private val entitySubscriptionManager = DefaultEntitySubscriptionManager(componentIdentityManager)
 
     class Builder {
         val systems = LinkedList<KClass<out AbstractSystem>>()
@@ -30,8 +30,11 @@ class World private constructor(val systems: LinkedList<KClass<out AbstractSyste
     fun init() {
         systems.map { it.primaryConstructor!!.call()}
             .forEach {
-                it.aspect(aspectManager.aspectFor(it.javaClass.kotlin))
+                val aspect = entitySubscriptionManager.aspectFor(it.javaClass.kotlin)
+                it.aspect(aspect)
                 systemInstances.add(it)
+                it._entityManager = entitySubscriptionManager
+                it._subscription = entitySubscriptionManager.subscribe(aspect)
             }
 
 
