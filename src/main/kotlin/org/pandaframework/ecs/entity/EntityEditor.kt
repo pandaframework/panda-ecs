@@ -8,6 +8,7 @@ import kotlin.reflect.KClass
  */
 interface EntityEditor {
     fun <T: Component> addComponent(component: KClass<T>): T
+    fun <T: Component> getComponent(component: KClass<T>): T?
     fun removeComponent(component: KClass<out Component>)
     fun hasComponent(component: KClass<out Component>): Boolean
 }

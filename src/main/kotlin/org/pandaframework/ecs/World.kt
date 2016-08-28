@@ -1,5 +1,6 @@
 package org.pandaframework.ecs
 
+import org.pandaframework.ecs.component.DefaultComponentFactories
 import org.pandaframework.ecs.component.DefaultComponentIdentityManager
 import org.pandaframework.ecs.entity.DefaultEntitySubscriptionManager
 import org.pandaframework.ecs.system.AbstractSystem
@@ -13,7 +14,10 @@ import kotlin.reflect.primaryConstructor
 class World private constructor(val systems: LinkedList<KClass<out AbstractSystem>>) {
     private val systemInstances = LinkedList<AbstractSystem>()
     private val componentIdentityManager = DefaultComponentIdentityManager()
-    private val entitySubscriptionManager = DefaultEntitySubscriptionManager(componentIdentityManager)
+    private val componentFactories = DefaultComponentFactories()
+    private val entitySubscriptionManager = DefaultEntitySubscriptionManager(
+        componentIdentityManager, componentFactories
+    )
 
     class Builder {
         val systems = LinkedList<KClass<out AbstractSystem>>()

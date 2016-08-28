@@ -32,6 +32,13 @@ class Bits private constructor(private val internal: BitSet) {
             }
         }
 
+        private fun xor(first: Bits, second: Bits): Bits {
+            return compose {
+                it.or(first.internal)
+                it.xor(second.internal)
+            }
+        }
+
         private fun set(bits: Bits, bit: Int, value: Boolean): Bits {
             return compose {
                 it.or(bits.internal)
@@ -53,9 +60,23 @@ class Bits private constructor(private val internal: BitSet) {
 
     fun or(other: Bits): Bits = or(this, other)
 
+    fun xor(other: Bits): Bits = xor(this, other)
+
     fun set(bit: Int): Bits = set(this, bit, true)
 
     fun set(bit: Int, value: Boolean): Bits = set(this, bit, value)
+
+    fun isEmpty() = internal.isEmpty
+
+    fun setBits(): List<Int> {
+        val list = LinkedList<Int>()
+        internal.stream()
+            .forEach {
+                list.add(it)
+            }
+
+        return list
+    }
 
     operator fun get(bit: Int): Boolean = get(this, bit)
 

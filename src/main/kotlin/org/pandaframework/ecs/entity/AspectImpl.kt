@@ -46,8 +46,8 @@ class AspectImpl(private val componentIdentityManager: ComponentIdentityManager)
 
 
     fun match(bits: Bits): Boolean {
-        return bits.and(allBits) == allBits &&
-            bits.and(anyBits) != Bits() &&
-            bits.and(excludeBits) == Bits()
+        return (allBits.isEmpty() || bits.and(allBits) == allBits) &&
+            (anyBits.isEmpty() || !bits.and(anyBits).isEmpty()) &&
+            (excludeBits.isEmpty() || bits.and(excludeBits).isEmpty())
     }
 }

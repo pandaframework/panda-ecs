@@ -1,6 +1,7 @@
 package org.pandaframework.ecs.entity
 
 import org.pandaframework.ecs.component.Component
+import org.pandaframework.ecs.component.ComponentFactories
 import org.pandaframework.ecs.component.ComponentIdentityManager
 import org.pandaframework.ecs.system.AbstractSystem
 import org.pandaframework.ecs.util.Bag
@@ -8,23 +9,41 @@ import org.pandaframework.ecs.util.Bits
 import org.pandaframework.ecs.util.identity.IdentityFactories
 import java.util.*
 import kotlin.reflect.KClass
-import kotlin.reflect.primaryConstructor
 
 /**
  * @author Ranie Jade Ramiso
  */
-class DefaultEntitySubscriptionManager(private val componentIdentityManager: ComponentIdentityManager)
+class DefaultEntitySubscriptionManager(private val componentIdentityManager: ComponentIdentityManager,
+                                       private val componentFactories: ComponentFactories)
     : EntitySubscriptionManager {
     val identityFactory = IdentityFactories.recycling()
 
     val entities = Bag<Bits>()
-    val components = Bag<MutableSet<Component>>()
+    val components = Bag<MutableMap<KClass<out Component>, Component>>()
     val editors = Bag<EntityEditor>()
     val aspectMap = HashMap<KClass<out AbstractSystem>, AspectImpl>()
     val aspects: MutableMap<AspectImpl, Bits> = HashMap()
 
     override fun subscribe(aspect: Aspect): EntitySubscription {
-        TODO()
+        return object: EntitySubscription {
+            override fun addListener(listener: EntitySubscription.Listener) {
+                TODO()
+            }
+
+            override fun removeListener(listener: EntitySubscription.Listener) {
+                TODO()
+            }
+
+            override fun entities(): IntArray {
+                val entities = aspects[aspect]!!.setBits()
+                return IntArray(entities.size).apply {
+                    entities.forEachIndexed { index, it ->
+                        this[index] = it
+                    }
+                }
+            }
+
+        }
     }
 
     override fun create(): Int {
@@ -34,7 +53,8 @@ class DefaultEntitySubscriptionManager(private val componentIdentityManager: Com
     }
 
     override fun remove(entity: Int) {
-        TODO()
+        assertEntityAlive(entity)
+        update(entity, null)
     }
 
     override fun edit(entity: Int): EntityEditor {
@@ -56,20 +76,36 @@ class DefaultEntitySubscriptionManager(private val componentIdentityManager: Com
         if (editor == null) {
             editor = object: EntityEditor {
                 override fun <T: Component> addComponent(component: KClass<T>): T {
+                    assertEntityAlive(entity)
                     val entityBits = entities[entity]!!
                         .or(componentIdentityManager.getIdentity(component))
                     update(entity, entityBits)
 
                     return createComponent(component).apply {
-                        getComponentsOf(entity).add(this)
+                        getComponentsOf(entity).put(component, this)
                     }
                 }
 
+                override fun <T: Component> getComponent(component: KClass<T>): T? {
+                    assertEntityAlive(entity)
+                    return getComponentsOf(entity)[component] as T?
+                }
+
                 override fun removeComponent(component: KClass<out Component>) {
-                    TODO()
+                    assertEntityAlive(entity)
+                    val entityBits = entities[entity]!!
+                        .xor(componentIdentityManager.getIdentity(component))
+
+                    update(entity, entityBits)
+                    val instance = getComponentsOf(entity).remove(component)
+                    if (instance != null) {
+                        cleanupComponent(instance)
+                    }
+
                 }
 
                 override fun hasComponent(component: KClass<out Component>): Boolean {
+                    assertEntityAlive(entity)
                     val bits = componentIdentityManager.getIdentity(component)
                     return entities[entity]!!
                         .and(bits) == bits
@@ -82,30 +118,44 @@ class DefaultEntitySubscriptionManager(private val componentIdentityManager: Com
         return editor
     }
 
-    private fun update(entity: Int, entityBits: Bits) {
-        entities[entity] = entityBits
-        aspects.forEach {
-            if (it.key.match(entityBits)) {
-                it.value.set(entity)
-            } else {
-                it.value.set(entity, false)
+    private fun update(entity: Int, entityBits: Bits?) {
+
+
+        if (entityBits != null) {
+            entities[entity] = entityBits
+            aspects.forEach {
+                aspects[it.key] = it.value.set(entity, it.key.match(entityBits))
+            }
+        } else {
+            val oldValue = entities[entity]!!
+            entities.remove(entity)
+            aspects.forEach {
+                if (it.key.match(oldValue)) {
+                    it.value.set(entity, false)
+                }
             }
         }
 
     }
 
-    private fun getComponentsOf(entity: Int): MutableSet<Component> {
+    private fun getComponentsOf(entity: Int): MutableMap<KClass<out Component>, Component> {
         return if (components.isPresent(entity)) {
             components[entity]!!
         } else {
-            HashSet<Component>().apply {
+            HashMap<KClass<out Component>, Component>().apply {
                 components[entity] = this
             }
         }
     }
 
     private fun <T: Component> createComponent(component: KClass<T>): T {
-        return component.primaryConstructor!!.call()
+        return componentFactories.factoryFor(component)
+            .create()
+    }
+
+    private fun <T: Component> cleanupComponent(component: T) {
+        componentFactories.factoryFor(component.javaClass.kotlin)
+            .release(component)
     }
 
     private fun assertEntityAlive(entity: Int) {
