@@ -24,27 +24,6 @@ class EntitySubscriptionManagerSpec: SubjectSpek<EntitySubscriptionManager>({
         DefaultEntitySubscriptionManager(DefaultComponentIdentityManager(), DefaultComponentFactories())
     }
 
-    describe("entity creation") {
-        it("should return unique ids") {
-            assertThat(subject.create(), !equalTo(subject.create()))
-        }
-    }
-
-    describe("entity removal") {
-        it("should throw an exception if entity is not alive") {
-            assertThat({
-                subject.remove(1)
-            }, throws<EntityNotFoundException>())
-        }
-
-        it("should delete alive entities") {
-            val entity = subject.create()
-            assertThat({
-                subject.remove(entity)
-            }, !throws<EntityNotFoundException>())
-        }
-    }
-
     describe("entity edit") {
         it("should throw an exception if entity is not alive") {
             assertThat({
@@ -68,7 +47,9 @@ class EntitySubscriptionManagerSpec: SubjectSpek<EntitySubscriptionManager>({
                 subject.edit(entity).addComponent(Component1::class)
             }
 
+
             it("should attach the component instance to that entity") {
+                assertThat(subject.edit(entity).hasComponent(Component1::class), equalTo(true))
                 assertThat(subject.edit(entity).getComponent(Component1::class), present(anything))
             }
         }
