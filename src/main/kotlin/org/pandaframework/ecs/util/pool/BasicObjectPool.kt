@@ -6,8 +6,8 @@ import java.util.*
  * @author Ranie Jade Ramiso
  */
 class BasicObjectPool<T>(val keepAlive: Int, val factory: () -> T): ObjectPool<T> {
-    val limbo: MutableSet<T> = HashSet()
-    val live: MutableSet<T> = HashSet()
+    private val limbo: MutableSet<T> = HashSet()
+    private val live: MutableSet<T> = HashSet()
 
     override fun acquire(): T {
         val instance = if (limbo.isNotEmpty()) {
