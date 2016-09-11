@@ -73,8 +73,9 @@ class EntitySubscriptionManagerSpec: SubjectSpek<EntitySubscriptionManager>({
         var entity: Int = 0
 
         beforeEach {
+            val aspectManager = DefaultAspectManager(DefaultComponentIdentityManager())
             // setup internal state
-            val aspect = subject.aspectFor(System1::class)
+            val aspect = aspectManager.aspectFor(System1::class)
             aspect.all(Component1::class, Component2::class)
             subscription = subject.subscribe(aspect)
             entity = subject.create()

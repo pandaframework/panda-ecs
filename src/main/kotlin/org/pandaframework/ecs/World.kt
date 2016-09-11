@@ -2,6 +2,7 @@ package org.pandaframework.ecs
 
 import org.pandaframework.ecs.component.DefaultComponentFactories
 import org.pandaframework.ecs.component.DefaultComponentIdentityManager
+import org.pandaframework.ecs.entity.DefaultAspectManager
 import org.pandaframework.ecs.entity.DefaultEntitySubscriptionManager
 import org.pandaframework.ecs.system.AbstractSystem
 import java.util.*
@@ -15,6 +16,7 @@ class World private constructor(val systems: LinkedList<KClass<out AbstractSyste
     private val systemInstances = LinkedList<AbstractSystem>()
     private val componentIdentityManager = DefaultComponentIdentityManager()
     private val componentFactories = DefaultComponentFactories()
+    private val aspectManager = DefaultAspectManager(componentIdentityManager)
     private val entitySubscriptionManager = DefaultEntitySubscriptionManager(
         componentIdentityManager, componentFactories
     )
@@ -34,11 +36,15 @@ class World private constructor(val systems: LinkedList<KClass<out AbstractSyste
     fun init() {
         systems.map { it.primaryConstructor!!.call()}
             .forEach {
-                val aspect = entitySubscriptionManager.aspectFor(it.javaClass.kotlin)
-                it.aspect(aspect)
+                val aspect = aspectManager.aspectFor(it.javaClass.kotlin)
+
+                it.apply {
+                    this.aspect(aspect)
+                    _entityManager = entitySubscriptionManager
+                    _subscription = entitySubscriptionManager.subscribe(aspect)
+                }
+
                 systemInstances.add(it)
-                it._entityManager = entitySubscriptionManager
-                it._subscription = entitySubscriptionManager.subscribe(aspect)
             }
 
 

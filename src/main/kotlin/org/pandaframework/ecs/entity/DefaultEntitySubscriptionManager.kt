@@ -3,7 +3,6 @@ package org.pandaframework.ecs.entity
 import org.pandaframework.ecs.component.Component
 import org.pandaframework.ecs.component.ComponentFactories
 import org.pandaframework.ecs.component.ComponentIdentityManager
-import org.pandaframework.ecs.system.AbstractSystem
 import org.pandaframework.ecs.util.Bag
 import org.pandaframework.ecs.util.Bits
 import org.pandaframework.ecs.util.identity.IdentityFactories
@@ -21,10 +20,12 @@ class DefaultEntitySubscriptionManager(private val componentIdentityManager: Com
     val entities = Bag<Bits>()
     val components = Bag<MutableMap<KClass<out Component>, Component>>()
     val editors = Bag<EntityEditor>()
-    val aspectMap = HashMap<KClass<out AbstractSystem>, AspectImpl>()
-    val aspects: MutableMap<AspectImpl, Bits> = HashMap()
+    val aspects = HashMap<AspectImpl, Bits>()
 
-    override fun subscribe(aspect: Aspect): EntitySubscription {
+    override fun subscribe(aspect: AspectImpl): EntitySubscription {
+        aspects.computeIfAbsent(aspect, {
+            Bits()
+        })
         return object: EntitySubscription {
             override fun addListener(listener: EntitySubscription.Listener) {
                 TODO()
@@ -60,14 +61,6 @@ class DefaultEntitySubscriptionManager(private val componentIdentityManager: Com
     override fun edit(entity: Int): EntityEditor {
         assertEntityAlive(entity)
         return getEntityEditor(entity)
-    }
-
-    override fun aspectFor(system: KClass<out AbstractSystem>): Aspect {
-        return aspectMap.computeIfAbsent(system, {
-            val aspect = AspectImpl(componentIdentityManager)
-            aspects.put(aspect, Bits())
-            aspect
-        })
     }
 
     private fun getEntityEditor(entity: Int): EntityEditor {
