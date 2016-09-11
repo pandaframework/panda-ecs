@@ -21,11 +21,7 @@ abstract class AbstractSystem {
 
     open fun init() { }
 
-    internal fun update(delta: Float) {
-        update(delta, subscription.entities())
-    }
-
-    protected abstract fun update(delta: Float, entities: IntArray)
+    abstract fun update(delta: Float)
 
     open fun destroy() { }
 }

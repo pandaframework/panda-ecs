@@ -6,6 +6,7 @@ package org.pandaframework.ecs.entity
 interface EntitySubscription {
     fun addListener(listener: Listener)
     fun removeListener(listener: Listener)
+
     fun entities(): IntArray
 
     interface Listener {
