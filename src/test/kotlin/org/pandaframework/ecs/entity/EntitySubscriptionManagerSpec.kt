@@ -64,7 +64,7 @@ class EntitySubscriptionManagerSpec: SubjectSpek<EntitySubscriptionManager>({
                 // aspect.all(Component1::class, Component2::class)
             }
 
-            override fun update(delta: Float, entities: IntArray) {
+            override fun update(delta: Float) {
                 // nada
             }
         }

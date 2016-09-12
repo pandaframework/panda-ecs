@@ -10,7 +10,7 @@ dependencyManagement {
             entry 'junit-platform-launcher'
         }
 
-        dependencySet(group: 'org.jetbrains.spek', version: '1.0.0-SNAPSHOT') {
+        dependencySet(group: 'org.jetbrains.spek', version: '1.0.89') {
             entry 'spek-api'
             entry 'spek-junit-platform-engine'
         }

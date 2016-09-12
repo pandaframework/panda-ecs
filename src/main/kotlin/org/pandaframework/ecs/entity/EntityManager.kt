@@ -6,4 +6,5 @@ package org.pandaframework.ecs.entity
 interface EntityManager {
     fun create(): Int
     fun remove(entity: Int)
+    fun edit(entity: Int): EntityEditor
 }

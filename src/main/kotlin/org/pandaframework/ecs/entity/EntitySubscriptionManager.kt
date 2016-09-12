@@ -5,5 +5,4 @@ package org.pandaframework.ecs.entity
  */
 interface EntitySubscriptionManager: EntityManager {
     fun subscribe(aspect: AspectImpl): EntitySubscription
-    fun edit(entity: Int): EntityEditor
 }
