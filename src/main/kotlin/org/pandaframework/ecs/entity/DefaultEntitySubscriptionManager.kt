@@ -1,5 +1,7 @@
 package org.pandaframework.ecs.entity
 
+import org.pandaframework.ecs.Mapper
+import org.pandaframework.ecs.MapperDelegate
 import org.pandaframework.ecs.component.Component
 import org.pandaframework.ecs.component.ComponentFactories
 import org.pandaframework.ecs.component.ComponentIdentityManager
@@ -8,21 +10,22 @@ import org.pandaframework.ecs.util.Bits
 import org.pandaframework.ecs.util.identity.IdentityFactories
 import java.util.*
 import kotlin.reflect.KClass
+import kotlin.reflect.KProperty
 
 /**
  * @author Ranie Jade Ramiso
  */
-class DefaultEntitySubscriptionManager(private val componentIdentityManager: ComponentIdentityManager,
+internal class DefaultEntitySubscriptionManager(private val componentIdentityManager: ComponentIdentityManager,
                                        private val componentFactories: ComponentFactories)
     : EntitySubscriptionManager {
-    val identityFactory = IdentityFactories.recycling()
+    private val identityFactory = IdentityFactories.recycling()
 
-    val entities = Bag<Bits>()
-    val components = Bag<MutableMap<KClass<out Component>, Component>>()
-    val editors = Bag<EntityEditor>()
-    val aspects = HashMap<AspectImpl, Bits>()
-    val listeners = HashMap<AspectImpl, MutableList<EntitySubscription.Listener>>()
+    private val entities = Bag<Bits>()
 
+    private val components = Bag<HashMap<KClass<out Component>, Component>>()
+    private val editors = Bag<EntityEditor>()
+    private val aspects = HashMap<AspectImpl, Bits>()
+    private val listeners = HashMap<AspectImpl, MutableList<EntitySubscription.Listener>>()
     override fun subscribe(aspect: AspectImpl): EntitySubscription {
         aspects.computeIfAbsent(aspect, {
             Bits()
@@ -66,6 +69,26 @@ class DefaultEntitySubscriptionManager(private val componentIdentityManager: Com
         return getEntityEditor(entity)
     }
 
+    override fun <T: Component> mapper(component: KClass<T>): MapperDelegate<T> {
+        return object: MapperDelegate<T> {
+            override fun getValue(thisRef: Any?, property: KProperty<*>): Mapper<T> {
+                return object: Mapper<T> {
+                    override fun get(entity: Int): T {
+                        return edit(entity).getComponent(component)
+                    }
+
+                    override fun contains(entity: Int) = edit(entity).hasComponent(component)
+
+                    override fun remove(entity: Int) {
+                        edit(entity).removeComponent(component)
+                    }
+
+                }
+            }
+
+        }
+    }
+
     private fun getListeners(aspect: AspectImpl): MutableList<EntitySubscription.Listener> {
         return listeners.computeIfAbsent(aspect, { LinkedList<EntitySubscription.Listener>() })
     }
@@ -75,20 +98,15 @@ class DefaultEntitySubscriptionManager(private val componentIdentityManager: Com
 
         if (editor == null) {
             editor = object: EntityEditor {
-                override fun <T: Component> addComponent(component: KClass<T>): T {
+                override fun <T: Component> getComponent(component: KClass<T>): T {
                     assertEntityAlive(entity)
                     val entityBits = entities[entity]!!
                         .or(componentIdentityManager.getIdentity(component))
                     update(entity, entityBits)
 
-                    return createComponent(component).apply {
-                        getComponentsOf(entity).put(component, this)
-                    }
-                }
-
-                override fun <T: Component> getComponent(component: KClass<T>): T? {
-                    assertEntityAlive(entity)
-                    return getComponentsOf(entity)[component] as T?
+                    return getComponentsOf(entity).computeIfAbsent(component, {
+                        createComponent(component)
+                    }) as T
                 }
 
                 override fun removeComponent(component: KClass<out Component>) {
@@ -154,7 +172,7 @@ class DefaultEntitySubscriptionManager(private val componentIdentityManager: Com
 
     }
 
-    private fun getComponentsOf(entity: Int): MutableMap<KClass<out Component>, Component> {
+    private fun getComponentsOf(entity: Int): HashMap<KClass<out Component>, Component> {
         return if (components.isPresent(entity)) {
             components[entity]!!
         } else {

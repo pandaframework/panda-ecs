@@ -34,18 +34,17 @@ class World private constructor(val systems: LinkedList<KClass<out AbstractSyste
     }
 
     fun init() {
-        systems.map { it.primaryConstructor!!.call()}
-            .forEach {
-                val aspect = aspectManager.aspectFor(it.javaClass.kotlin)
+        systems.forEach {
+            val aspect = aspectManager.aspectFor(it)
+            val instance = it.primaryConstructor!!.call(
+                entitySubscriptionManager,
+                entitySubscriptionManager.subscribe(aspect)
+            )
 
-                it.apply {
-                    this.aspect(aspect)
-                    _entityManager = entitySubscriptionManager
-                    _subscription = entitySubscriptionManager.subscribe(aspect)
-                }
+            instance.aspect(aspect)
 
-                systemInstances.add(it)
-            }
+            systemInstances.add(instance)
+        }
 
 
         systemInstances.forEach {
@@ -54,8 +53,10 @@ class World private constructor(val systems: LinkedList<KClass<out AbstractSyste
     }
 
 
-    fun update(delta: Double) {
-
+    fun update(delta: Float) {
+        systemInstances.forEach {
+            it.update(delta)
+        }
     }
 
     fun destroy() {

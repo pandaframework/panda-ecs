@@ -18,7 +18,7 @@ import java.util.*
 /**
  * @author Ranie Jade Ramiso
  */
-class EntitySubscriptionManagerSpec: SubjectSpek<EntitySubscriptionManager>({
+internal class EntitySubscriptionManagerSpec: SubjectSpek<EntitySubscriptionManager>({
 
     subject {
         DefaultEntitySubscriptionManager(DefaultComponentIdentityManager(), DefaultComponentFactories())
@@ -44,7 +44,7 @@ class EntitySubscriptionManagerSpec: SubjectSpek<EntitySubscriptionManager>({
 
             beforeEach {
                 entity = subject.create()
-                subject.edit(entity).addComponent(Component1::class)
+                subject.edit(entity).getComponent(Component1::class)
             }
 
 
@@ -59,7 +59,8 @@ class EntitySubscriptionManagerSpec: SubjectSpek<EntitySubscriptionManager>({
         class Component1: Component
         class Component2: Component
 
-        class System1: AbstractSystem() {
+        class System1(entityManager: EntityManager,
+                      subscription: EntitySubscription): AbstractSystem(entityManager, subscription) {
             override fun aspect(aspect: Aspect) {
                 // aspect.all(Component1::class, Component2::class)
             }
@@ -84,8 +85,8 @@ class EntitySubscriptionManagerSpec: SubjectSpek<EntitySubscriptionManager>({
         on("entity edit") {
             beforeEach {
                 val editor = subject.edit(entity)
-                editor.addComponent(Component1::class)
-                editor.addComponent(Component2::class)
+                editor.getComponent(Component1::class)
+                editor.getComponent(Component2::class)
             }
 
             it("should contain all entities matching the aspect") {
@@ -116,16 +117,16 @@ class EntitySubscriptionManagerSpec: SubjectSpek<EntitySubscriptionManager>({
 
             it("should notify when an entity is added") {
                 val editor = subject.edit(entity)
-                editor.addComponent(Component1::class)
-                editor.addComponent(Component2::class)
+                editor.getComponent(Component1::class)
+                editor.getComponent(Component2::class)
 
                 assertThat(added.contains(entity), equalTo(true))
             }
 
             it("should notify when an entity is removed") {
                 val editor = subject.edit(entity)
-                editor.addComponent(Component1::class)
-                editor.addComponent(Component2::class)
+                editor.getComponent(Component1::class)
+                editor.getComponent(Component2::class)
 
                 editor.removeComponent(Component1::class)
 
