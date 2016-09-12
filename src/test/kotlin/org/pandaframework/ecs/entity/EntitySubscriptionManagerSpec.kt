@@ -9,7 +9,6 @@ import org.jetbrains.spek.api.SubjectSpek
 import org.jetbrains.spek.api.dsl.describe
 import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
-import org.jetbrains.spek.api.dsl.xdescribe
 import org.pandaframework.ecs.component.Component
 import org.pandaframework.ecs.component.DefaultComponentFactories
 import org.pandaframework.ecs.component.DefaultComponentIdentityManager
