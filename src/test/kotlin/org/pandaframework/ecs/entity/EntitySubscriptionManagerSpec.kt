@@ -14,6 +14,7 @@ import org.pandaframework.ecs.component.Component
 import org.pandaframework.ecs.component.DefaultComponentFactories
 import org.pandaframework.ecs.component.DefaultComponentIdentityManager
 import org.pandaframework.ecs.system.AbstractSystem
+import java.util.*
 
 /**
  * @author Ranie Jade Ramiso
@@ -95,8 +96,48 @@ class EntitySubscriptionManagerSpec: SubjectSpek<EntitySubscriptionManager>({
             }
         }
 
-        xdescribe("listeners") {
+        describe("listeners") {
+            var listener: EntitySubscription.Listener? = null
+            val added = LinkedList<Int>()
+            val removed = LinkedList<Int>()
 
+            beforeEach {
+                listener = object: EntitySubscription.Listener {
+                    override fun entityAdded(entity: Int) {
+                        added.add(entity)
+                    }
+
+                    override fun entityRemoved(entity: Int) {
+                        removed.add(entity)
+                    }
+
+                }
+                subscription!!.addListener(listener!!)
+            }
+
+            it("should notify when an entity is added") {
+                val editor = subject.edit(entity)
+                editor.addComponent(Component1::class)
+                editor.addComponent(Component2::class)
+
+                assertThat(added.contains(entity), equalTo(true))
+            }
+
+            it("should notify when an entity is removed") {
+                val editor = subject.edit(entity)
+                editor.addComponent(Component1::class)
+                editor.addComponent(Component2::class)
+
+                editor.removeComponent(Component1::class)
+
+                assertThat(removed.contains(entity), equalTo(true))
+            }
+
+            afterEach {
+                subscription!!.removeListener(listener!!)
+                added.clear()
+                removed.clear()
+            }
         }
     }
 })

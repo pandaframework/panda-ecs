@@ -21,18 +21,21 @@ class DefaultEntitySubscriptionManager(private val componentIdentityManager: Com
     val components = Bag<MutableMap<KClass<out Component>, Component>>()
     val editors = Bag<EntityEditor>()
     val aspects = HashMap<AspectImpl, Bits>()
+    val listeners = HashMap<AspectImpl, MutableList<EntitySubscription.Listener>>()
 
     override fun subscribe(aspect: AspectImpl): EntitySubscription {
         aspects.computeIfAbsent(aspect, {
             Bits()
         })
+        val listeners = getListeners(aspect)
+
         return object: EntitySubscription {
             override fun addListener(listener: EntitySubscription.Listener) {
-                TODO()
+                listeners.add(listener)
             }
 
             override fun removeListener(listener: EntitySubscription.Listener) {
-                TODO()
+                listeners.remove(listener)
             }
 
             override fun entities(): IntArray {
@@ -61,6 +64,10 @@ class DefaultEntitySubscriptionManager(private val componentIdentityManager: Com
     override fun edit(entity: Int): EntityEditor {
         assertEntityAlive(entity)
         return getEntityEditor(entity)
+    }
+
+    private fun getListeners(aspect: AspectImpl): MutableList<EntitySubscription.Listener> {
+        return listeners.computeIfAbsent(aspect, { LinkedList<EntitySubscription.Listener>() })
     }
 
     private fun getEntityEditor(entity: Int): EntityEditor {
@@ -117,7 +124,20 @@ class DefaultEntitySubscriptionManager(private val componentIdentityManager: Com
         if (entityBits != null) {
             entities[entity] = entityBits
             aspects.forEach {
-                aspects[it.key] = it.value.set(entity, it.key.match(entityBits))
+                val match = it.key.match(entityBits)
+                val previouslySet = it.value[entity]
+                aspects[it.key] = it.value.set(entity, match)
+
+                val listeners = getListeners(it.key)
+                if (previouslySet && !match) {
+                    listeners.forEach {
+                        it.entityRemoved(entity)
+                    }
+                } else if (!previouslySet && match) {
+                    listeners.forEach {
+                        it.entityAdded(entity)
+                    }
+                }
             }
         } else {
             val oldValue = entities[entity]!!
@@ -125,6 +145,9 @@ class DefaultEntitySubscriptionManager(private val componentIdentityManager: Com
             aspects.forEach {
                 if (it.key.match(oldValue)) {
                     it.value.set(entity, false)
+                    listeners[it.key]!!.forEach {
+                        it.entityRemoved(entity)
+                    }
                 }
             }
         }
