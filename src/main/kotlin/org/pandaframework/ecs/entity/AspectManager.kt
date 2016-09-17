@@ -6,6 +6,6 @@ import kotlin.reflect.KClass
 /**
  * @author Ranie Jade Ramiso
  */
-interface AspectManager {
+internal interface AspectManager {
     fun aspectFor(system: KClass<out AbstractSystem>): AspectImpl
 }

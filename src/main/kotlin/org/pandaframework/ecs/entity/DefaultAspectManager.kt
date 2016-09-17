@@ -8,7 +8,7 @@ import kotlin.reflect.KClass
 /**
  * @author Ranie Jade Ramiso
  */
-class DefaultAspectManager(val componentIdentityManager: ComponentIdentityManager): AspectManager {
+internal class DefaultAspectManager(val componentIdentityManager: ComponentIdentityManager): AspectManager {
     val aspectMap = HashMap<KClass<out AbstractSystem>, AspectImpl>()
 
     override fun aspectFor(system: KClass<out AbstractSystem>): AspectImpl {

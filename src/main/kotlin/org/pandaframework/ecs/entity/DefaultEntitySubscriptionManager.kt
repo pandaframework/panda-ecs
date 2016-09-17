@@ -26,31 +26,35 @@ internal class DefaultEntitySubscriptionManager(private val componentIdentityMan
     private val editors = Bag<EntityEditor>()
     private val aspects = HashMap<AspectImpl, Bits>()
     private val listeners = HashMap<AspectImpl, MutableList<EntitySubscription.Listener>>()
+
+    private val subscriptionCache = HashMap<AspectImpl, EntitySubscription>()
+
     override fun subscribe(aspect: AspectImpl): EntitySubscription {
-        aspects.computeIfAbsent(aspect, {
-            Bits()
-        })
-        val listeners = getListeners(aspect)
+        return subscriptionCache.computeIfAbsent(aspect, {
+            aspects.computeIfAbsent(aspect, {
+                Bits()
+            })
+            val listeners = getListeners(aspect)
 
-        return object: EntitySubscription {
-            override fun addListener(listener: EntitySubscription.Listener) {
-                listeners.add(listener)
-            }
+            object: EntitySubscription {
+                override fun addListener(listener: EntitySubscription.Listener) {
+                    listeners.add(listener)
+                }
 
-            override fun removeListener(listener: EntitySubscription.Listener) {
-                listeners.remove(listener)
-            }
+                override fun removeListener(listener: EntitySubscription.Listener) {
+                    listeners.remove(listener)
+                }
 
-            override fun entities(): IntArray {
-                val entities = aspects[aspect]!!.setBits()
-                return IntArray(entities.size).apply {
-                    entities.forEachIndexed { index, it ->
-                        this[index] = it
+                override fun entities(): IntArray {
+                    val entities = aspects[aspect]!!.setBits()
+                    return IntArray(entities.size).apply {
+                        entities.forEachIndexed { index, it ->
+                            this[index] = it
+                        }
                     }
                 }
             }
-
-        }
+        })
     }
 
     override fun create(): Int {
