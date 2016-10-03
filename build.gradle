@@ -2,6 +2,7 @@ version = "0.1.0-SNAPSHOT"
 
 apply plugin: 'org.junit.platform.gradle.plugin'
 apply plugin: 'jacoco'
+apply plugin: 'idea'
 
 apply from: "$rootDir/gradle/common/dependencies.gradle"
 apply from: "$rootDir/gradle/common/kotlin.gradle"
@@ -49,6 +50,27 @@ junitPlatform {
     }
 }
 
+sourceSets {
+    integration {
+        kotlin {
+            srcDir "src/integration/kotlin"
+            compileClasspath += main.output
+        }
+    }
+}
+
+configurations {
+    integrationCompile.extendsFrom testCompile
+    integrationRuntime.extendsFrom testRuntime
+}
+
+idea {
+    module {
+        testSourceDirs += file("src/integration/kotlin")
+        scopes.TEST.plus += configurations.integrationCompile
+        scopes.TEST.plus += configurations. integrationRuntime
+    }
+}
 
 
 dependencies {

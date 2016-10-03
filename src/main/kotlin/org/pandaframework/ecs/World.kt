@@ -22,7 +22,7 @@ class World private constructor(val systems: LinkedList<KClass<out AbstractSyste
     )
 
     class Builder {
-        val systems = LinkedList<KClass<out AbstractSystem>>()
+        private val systems = LinkedList<KClass<out AbstractSystem>>()
         fun withSystem(vararg systems: KClass<out AbstractSystem>): Builder {
             this.systems.addAll(systems)
             return this
