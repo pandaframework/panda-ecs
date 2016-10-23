@@ -9,7 +9,12 @@ import org.jetbrains.spek.api.dsl.it
 import org.pandaframework.ecs.component.Component
 import org.pandaframework.ecs.component.DefaultComponentFactories
 import org.pandaframework.ecs.component.DefaultComponentIdentityManager
-import org.pandaframework.ecs.entity.*
+import org.pandaframework.ecs.entity.Aspect
+import org.pandaframework.ecs.entity.AspectManager
+import org.pandaframework.ecs.entity.DefaultAspectManager
+import org.pandaframework.ecs.entity.DefaultEntitySubscriptionManager
+import org.pandaframework.ecs.entity.EntitySubscription
+import org.pandaframework.ecs.entity.EntitySubscriptionManager
 import org.pandaframework.ecs.system.AbstractSystem
 
 /**
@@ -18,8 +23,7 @@ import org.pandaframework.ecs.system.AbstractSystem
 class MapperSpec: Spek({
     class Component1: Component
 
-    class TestSystem(entityManager: EntityManager,
-                     subscription: EntitySubscription): AbstractSystem(entityManager, subscription) {
+    class TestSystem(): AbstractSystem() {
         val mapper: Mapper<Component1> by mapper()
 
         override fun aspect(aspect: Aspect) {
@@ -39,10 +43,13 @@ class MapperSpec: Spek({
         val componentIdentityManager = DefaultComponentIdentityManager()
         val aspectManager: AspectManager = DefaultAspectManager(componentIdentityManager)
         entityManager = DefaultEntitySubscriptionManager(componentIdentityManager, DefaultComponentFactories())
-        val aspect = aspectManager.aspectFor(TestSystem::class)
+        system = TestSystem()
+        val aspect = aspectManager.aspectFor(system!!)
         subscription = entityManager!!.subscribe(aspect)
+        system!!.entityManager = entityManager!!
+        system!!.subscription = subscription!!
+        system!!.aspect(aspect)
 
-        system = TestSystem(entityManager!!, subscription!!)
 
         entity = entityManager!!.create()
     }

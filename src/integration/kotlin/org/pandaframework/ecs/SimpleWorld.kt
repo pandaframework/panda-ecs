@@ -6,7 +6,7 @@ import org.jetbrains.spek.api.dsl.it
 /**
  * @author Ranie Jade Ramiso
  */
-class Foo: Spek({
+class SimpleWorld: Spek({
     val world = World.Builder()
         .build()
 

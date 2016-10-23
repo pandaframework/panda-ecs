@@ -5,15 +5,12 @@ import org.pandaframework.ecs.component.DefaultComponentIdentityManager
 import org.pandaframework.ecs.entity.DefaultAspectManager
 import org.pandaframework.ecs.entity.DefaultEntitySubscriptionManager
 import org.pandaframework.ecs.system.AbstractSystem
-import java.util.*
-import kotlin.reflect.KClass
-import kotlin.reflect.primaryConstructor
+import java.util.LinkedList
 
 /**
  * @author Ranie Jade Ramiso
  */
-class World private constructor(val systems: LinkedList<KClass<out AbstractSystem>>) {
-    private val systemInstances = LinkedList<AbstractSystem>()
+class World private constructor(val systems: LinkedList<AbstractSystem>) {
     private val componentIdentityManager = DefaultComponentIdentityManager()
     private val componentFactories = DefaultComponentFactories()
     private val aspectManager = DefaultAspectManager(componentIdentityManager)
@@ -22,8 +19,9 @@ class World private constructor(val systems: LinkedList<KClass<out AbstractSyste
     )
 
     class Builder {
-        private val systems = LinkedList<KClass<out AbstractSystem>>()
-        fun withSystem(vararg systems: KClass<out AbstractSystem>): Builder {
+        private val systems = LinkedList<AbstractSystem>()
+
+        fun withSystem(vararg systems: AbstractSystem): Builder {
             this.systems.addAll(systems)
             return this
         }
@@ -36,32 +34,21 @@ class World private constructor(val systems: LinkedList<KClass<out AbstractSyste
     fun init() {
         systems.forEach {
             val aspect = aspectManager.aspectFor(it)
-            val instance = it.primaryConstructor!!.call(
-                entitySubscriptionManager,
-                entitySubscriptionManager.subscribe(aspect)
-            )
-
-            instance.aspect(aspect)
-
-            systemInstances.add(instance)
-        }
-
-
-        systemInstances.forEach {
+            it.entityManager = entitySubscriptionManager
+            it.subscription = entitySubscriptionManager.subscribe(aspect)
+            it.aspect(aspect)
             it.init()
         }
     }
 
 
     fun update(delta: Float) {
-        systemInstances.forEach {
+        systems.forEach {
             it.update(delta)
         }
     }
 
     fun destroy() {
-        systemInstances.forEach {
-            it.destroy()
-        }
+        systems.forEach(AbstractSystem::destroy)
     }
 }

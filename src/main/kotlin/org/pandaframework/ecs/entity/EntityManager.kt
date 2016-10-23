@@ -1,6 +1,6 @@
 package org.pandaframework.ecs.entity
 
-import org.pandaframework.ecs.MapperDelegate
+import org.pandaframework.ecs.Mapper
 import org.pandaframework.ecs.component.Component
 import kotlin.reflect.KClass
 
@@ -10,5 +10,5 @@ import kotlin.reflect.KClass
 interface EntityManager {
     fun create(): Int
     fun remove(entity: Int)
-    fun <T: Component> mapper(component: KClass<T>): MapperDelegate<T>
+    fun <T: Component> mapper(component: KClass<T>): Mapper<T>
 }

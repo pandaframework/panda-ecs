@@ -1,16 +1,15 @@
 package org.pandaframework.ecs.entity
 
 import org.pandaframework.ecs.Mapper
-import org.pandaframework.ecs.MapperDelegate
 import org.pandaframework.ecs.component.Component
 import org.pandaframework.ecs.component.ComponentFactories
 import org.pandaframework.ecs.component.ComponentIdentityManager
 import org.pandaframework.ecs.util.Bag
 import org.pandaframework.ecs.util.Bits
 import org.pandaframework.ecs.util.identity.IdentityFactories
-import java.util.*
+import java.util.HashMap
+import java.util.LinkedList
 import kotlin.reflect.KClass
-import kotlin.reflect.KProperty
 
 /**
  * @author Ranie Jade Ramiso
@@ -73,21 +72,16 @@ internal class DefaultEntitySubscriptionManager(private val componentIdentityMan
         return getEntityEditor(entity)
     }
 
-    override fun <T: Component> mapper(component: KClass<T>): MapperDelegate<T> {
-        return object: MapperDelegate<T> {
-            override fun getValue(thisRef: Any?, property: KProperty<*>): Mapper<T> {
-                return object: Mapper<T> {
-                    override fun get(entity: Int): T {
-                        return edit(entity).getComponent(component)
-                    }
+    override fun <T: Component> mapper(component: KClass<T>): Mapper<T> {
+        return object: Mapper<T> {
+            override fun get(entity: Int): T {
+                return edit(entity).getComponent(component)
+            }
 
-                    override fun contains(entity: Int) = edit(entity).hasComponent(component)
+            override fun contains(entity: Int) = edit(entity).hasComponent(component)
 
-                    override fun remove(entity: Int) {
-                        edit(entity).removeComponent(component)
-                    }
-
-                }
+            override fun remove(entity: Int) {
+                edit(entity).removeComponent(component)
             }
 
         }

@@ -14,8 +14,7 @@ internal class AspectManagerSpec: SubjectSpek<AspectManager>({
     subject { DefaultAspectManager(DefaultComponentIdentityManager()) }
 
     it("should return the same instance") {
-        class System(entityManager: EntityManager,
-                     subscription: EntitySubscription): AbstractSystem(entityManager, subscription) {
+        class System(): AbstractSystem() {
             override fun aspect(aspect: Aspect) {
                 // nada
             }
@@ -25,7 +24,8 @@ internal class AspectManagerSpec: SubjectSpek<AspectManager>({
             }
         }
 
+        val system = System()
 
-        assertThat(subject.aspectFor(System::class), sameInstance(subject.aspectFor(System::class)))
+        assertThat(subject.aspectFor(system), sameInstance(subject.aspectFor(system)))
     }
 })

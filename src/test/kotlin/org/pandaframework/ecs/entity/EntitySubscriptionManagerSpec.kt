@@ -13,7 +13,7 @@ import org.pandaframework.ecs.component.Component
 import org.pandaframework.ecs.component.DefaultComponentFactories
 import org.pandaframework.ecs.component.DefaultComponentIdentityManager
 import org.pandaframework.ecs.system.AbstractSystem
-import java.util.*
+import java.util.LinkedList
 
 /**
  * @author Ranie Jade Ramiso
@@ -59,8 +59,7 @@ internal class EntitySubscriptionManagerSpec: SubjectSpek<EntitySubscriptionMana
         class Component1: Component
         class Component2: Component
 
-        class System1(entityManager: EntityManager,
-                      subscription: EntitySubscription): AbstractSystem(entityManager, subscription) {
+        class System1(): AbstractSystem() {
             override fun aspect(aspect: Aspect) {
                 // aspect.all(Component1::class, Component2::class)
             }
@@ -76,7 +75,7 @@ internal class EntitySubscriptionManagerSpec: SubjectSpek<EntitySubscriptionMana
         beforeEach {
             val aspectManager = DefaultAspectManager(DefaultComponentIdentityManager())
             // setup internal state
-            val aspect = aspectManager.aspectFor(System1::class)
+            val aspect = aspectManager.aspectFor(System1())
             aspect.all(Component1::class, Component2::class)
             subscription = subject.subscribe(aspect)
             entity = subject.create()
