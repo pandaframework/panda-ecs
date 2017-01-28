@@ -3,14 +3,14 @@ package org.pandaframework.ecs.util.identity
 import com.natpryce.hamkrest.assertion.assertThat
 import com.natpryce.hamkrest.equalTo
 import com.natpryce.hamkrest.greaterThanOrEqualTo
-import org.jetbrains.spek.api.SubjectSpek
 import org.jetbrains.spek.api.dsl.describe
 import org.jetbrains.spek.api.dsl.it
+import org.jetbrains.spek.subject.SubjectSpek
 
 /**
  * @author Ranie Jade Ramiso
  */
-class IdentityFactorySpec : SubjectSpek<IdentityFactory>({
+object IdentityFactorySpec : SubjectSpek<IdentityFactory>({
     subject { IdentityFactories.basic() }
     describe("generate") {
         it("should not return negative numbers") {

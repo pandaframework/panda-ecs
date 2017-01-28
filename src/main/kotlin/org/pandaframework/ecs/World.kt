@@ -1,54 +1,37 @@
 package org.pandaframework.ecs
 
-import org.pandaframework.ecs.component.DefaultComponentFactories
-import org.pandaframework.ecs.component.DefaultComponentIdentityManager
-import org.pandaframework.ecs.entity.DefaultAspectManager
-import org.pandaframework.ecs.entity.DefaultEntitySubscriptionManager
-import org.pandaframework.ecs.system.AbstractSystem
-import java.util.LinkedList
+import org.pandaframework.ecs.entity.EntityManager
+import org.pandaframework.ecs.state.State
+import org.pandaframework.ecs.state.StateManager
+import org.pandaframework.ecs.system.System
 
 /**
  * @author Ranie Jade Ramiso
  */
-class World private constructor(val systems: LinkedList<AbstractSystem>) {
-    private val componentIdentityManager = DefaultComponentIdentityManager()
-    private val componentFactories = DefaultComponentFactories()
-    private val aspectManager = DefaultAspectManager(componentIdentityManager)
-    private val entitySubscriptionManager = DefaultEntitySubscriptionManager(
-        componentIdentityManager, componentFactories
-    )
+class World<T: State>(val entityManager: EntityManager,
+                      val stateManager: StateManager<T>,
+                      private val systems: List<System<T>>) {
 
-    class Builder {
-        private val systems = LinkedList<AbstractSystem>()
-
-        fun withSystem(vararg systems: AbstractSystem): Builder {
-            this.systems.addAll(systems)
-            return this
-        }
-
-        fun build(): World {
-            return World(systems)
-        }
-    }
-
-    fun init() {
+    fun setup() {
         systems.forEach {
-            val aspect = aspectManager.aspectFor(it)
-            it.entityManager = entitySubscriptionManager
-            it.subscription = entitySubscriptionManager.subscribe(aspect)
-            it.aspect(aspect)
-            it.init()
+            it._entityManager = entityManager
+            it._stateManager = stateManager
+
+            stateManager.states.values.forEach {
+                it._entityManager = entityManager
+                it._stateManager = stateManager
+            }
+
+            it.bootstrap()
+            it.setup()
         }
     }
 
-
-    fun update(delta: Float) {
-        systems.forEach {
-            it.update(delta)
-        }
+    fun update(time: Double) {
+        systems.forEach { it.update(time) }
     }
 
-    fun destroy() {
-        systems.forEach(AbstractSystem::destroy)
+    fun cleanup() {
+        systems.forEach(System<T>::cleanup)
     }
 }

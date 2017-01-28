@@ -4,6 +4,6 @@ internal class BasicIdentityFactory: IdentityFactory {
     private var identityCount = 0
 
     override fun generate(): Int {
-        return identityCount++
+        return ++identityCount
     }
 }

@@ -1,6 +1,6 @@
 package org.pandaframework.ecs.util.identity
 
-import java.util.*
+import java.util.BitSet
 
 class RecyclingIdentityFactory (delegate: IdentityFactory): ForwardingIdentityFactory(delegate) {
     private val recycled: BitSet = BitSet()

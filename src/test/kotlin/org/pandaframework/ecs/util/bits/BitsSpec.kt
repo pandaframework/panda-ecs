@@ -11,7 +11,7 @@ import org.pandaframework.ecs.util.Bits
 /**
  * @author Ranie Jade Ramiso
  */
-class BitsSpec: Spek({
+object BitsSpec: Spek({
     describe("Bits") {
         describe("creation") {
             it("should return the same instance") {

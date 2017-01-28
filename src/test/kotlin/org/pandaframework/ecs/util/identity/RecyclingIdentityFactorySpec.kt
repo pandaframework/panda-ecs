@@ -2,18 +2,18 @@ package org.pandaframework.ecs.util.identity
 
 import com.natpryce.hamkrest.assertion.assertThat
 import com.natpryce.hamkrest.equalTo
-import org.jetbrains.spek.api.SubjectSpek
 import org.jetbrains.spek.api.dsl.describe
 import org.jetbrains.spek.api.dsl.it
-import org.jetbrains.spek.api.dsl.itBehavesLike
+import org.jetbrains.spek.subject.SubjectSpek
+import org.jetbrains.spek.subject.itBehavesLike
 
 /**
  * @author Ranie Jade Ramiso
  */
-class RecyclingIdentityFactorySpec: SubjectSpek<RecyclingIdentityFactory>({
+object RecyclingIdentityFactorySpec: SubjectSpek<RecyclingIdentityFactory>({
     subject { IdentityFactories.recycling() }
 
-    itBehavesLike(IdentityFactorySpec::class)
+    itBehavesLike(IdentityFactorySpec)
 
     describe("free") {
         it("should reuse the freed identity") {

@@ -11,11 +11,11 @@ class Bits private constructor(private val internal: BitSet) {
 
     companion object {
         private val builder = BitSet()
-        private val zero = Bits(BitSet())
-        private var cache: MutableMap<BitSet, Bits> = mutableMapOf(zero.internal to zero)
+        val ZERO = Bits(BitSet())
+        private var cache: MutableMap<BitSet, Bits> = mutableMapOf(ZERO.internal to ZERO)
 
         operator fun invoke (): Bits {
-            return zero
+            return ZERO
         }
 
         private fun and(first: Bits, second: Bits): Bits {
@@ -56,15 +56,15 @@ class Bits private constructor(private val internal: BitSet) {
         }
     }
 
-    fun and(other: Bits): Bits = and(this, other)
+    fun and(other: Bits): Bits = Companion.and(this, other)
 
-    fun or(other: Bits): Bits = or(this, other)
+    fun or(other: Bits): Bits = Companion.or(this, other)
 
-    fun xor(other: Bits): Bits = xor(this, other)
+    fun xor(other: Bits): Bits = Companion.xor(this, other)
 
-    fun set(bit: Int): Bits = set(this, bit, true)
+    fun set(bit: Int): Bits = Companion.set(this, bit, true)
 
-    fun set(bit: Int, value: Boolean): Bits = set(this, bit, value)
+    fun set(bit: Int, value: Boolean): Bits = Companion.set(this, bit, value)
 
     fun isEmpty() = internal.isEmpty
 
@@ -78,7 +78,7 @@ class Bits private constructor(private val internal: BitSet) {
         return list
     }
 
-    operator fun get(bit: Int): Boolean = get(this, bit)
+    operator fun get(bit: Int): Boolean = Companion.get(this, bit)
 
     override fun equals(other: Any?): Boolean {
         if (this === other) {

@@ -2,13 +2,13 @@ package org.pandaframework.ecs.util.pool
 
 import com.natpryce.hamkrest.assertion.assertThat
 import com.natpryce.hamkrest.sameInstance
-import org.jetbrains.spek.api.SubjectSpek
 import org.jetbrains.spek.api.dsl.it
+import org.jetbrains.spek.subject.SubjectSpek
 
 /**
  * @author Ranie Jade Ramiso
  */
-class ObjectPoolSpec: SubjectSpek<ObjectPool<Any>>({
+object ObjectPoolSpec: SubjectSpek<ObjectPool<Any>>({
     subject {
         BasicObjectPool(10, { Any() })
     }
