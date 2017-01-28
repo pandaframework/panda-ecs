@@ -7,7 +7,7 @@ import org.pandaframework.ecs.entity.EntitySubscription
 /**
  * @author Ranie Jade Ramiso
  */
-internal interface EntityPool {
+interface EntityPool {
     fun create(): Entity
     fun edit(entity: Entity): EntityEditor
     fun destroy(entity: Entity)

@@ -7,7 +7,7 @@ import kotlin.reflect.KClass
 /**
  * @author Ranie Jade Ramiso
  */
-internal class MapperImpl<out T: Component>(private val entityPool: EntityPool,
+class MapperImpl<out T: Component>(private val entityPool: EntityPool,
                                    private val component: KClass<T>): Mapper<T> {
 
     override fun get(entity: Entity): T {

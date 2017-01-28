@@ -12,7 +12,7 @@ import org.pandaframework.ecs.util.identity.IdentityFactories
 /**
  * @author Ranie Jade Ramiso
  */
-internal class BasicEntityPool(private val componentManager: ComponentManager): EntityPool {
+class BasicEntityPool(private val componentManager: ComponentManager): EntityPool {
     private val identityFactory = IdentityFactories.recycling()
 
     // contains the ComponentBits of all entities
@@ -21,8 +21,7 @@ internal class BasicEntityPool(private val componentManager: ComponentManager): 
     // this will be increased by BUFFER_GROW whenever we ran out of space
     // ComponentBits is implemented as a fly-weight, so it should be memory efficient
     // most of the time, elements of this buffer will point to the same instance
-    private var entities = emptyArray<ComponentBits>()
-        .copyOf(BUFFER_INITIAL)
+    private var entities = Array<ComponentBits?>(BUFFER_INITIAL, { null })
 
     // this will be used to keep track the right most indexed that has a value
     // whenever a large number of entities are destroyed we need to shrink entities
@@ -56,7 +55,12 @@ internal class BasicEntityPool(private val componentManager: ComponentManager): 
     }
 
     override fun destroy(entity: Entity) {
-        TODO()
+        val index = entity - 1
+        require(index < entities.size, { "Entity '$entity' does not exist"})
+        requireNotNull(entities[index], { "Entity '$entity' does not exist"})
+        removeFromBucket(entities[index]!!, entity)
+        entities[index] = null
+        identityFactory.free(entity)
     }
 
     override fun subscribe(aspect: Aspect): EntitySubscription {
@@ -94,16 +98,70 @@ internal class BasicEntityPool(private val componentManager: ComponentManager): 
     private fun placeInBucket(componentBits: ComponentBits, entity: Entity) {
         var bucket = buckets.getOrElse(componentBits) { EMPTY_INT_ARRAY.copyOf(BUFFER_INITIAL)}
         var size = bucketSize.getOrDefault(componentBits, 0)
-        size++
 
-        bucket = if (size > bucket.size) {
+        bucket = if (size + 1 > bucket.size) {
             bucket.copyOf(bucket.size + BUFFER_GROW)
         } else {
             bucket
         }
-        bucket[size - 1] = entity
+        // entity does not exist at this point, index is insertion index
+        val index = if (size == 0) {
+            // optimization
+            0
+        } else {
+            Math.abs(bucket.binarySearch(entity, 0, size) + 1)
+        }
+        // shift elements to the right starting from index until the index of the last entity (size - 1)
+        bucket.shiftRight(index, size - 1)
+
+        bucket[index] = entity
+        size += 1
         buckets.put(componentBits, bucket)
         bucketSize.put(componentBits, size)
+    }
+
+    private fun removeFromBucket(componentBits: ComponentBits, entity: Entity) {
+        val bucket = buckets[componentBits]!!
+        var size = bucketSize[componentBits]!!
+
+        // entity exists, index is the actual index of the entity
+        val index = bucket.binarySearch(entity, 0, size)
+        // shift everything to the left starting from index + 1 to size
+        // index points to the entity we want to remove
+        // since we moved the last entity, its previous index still contains a reference to it. That's
+        // why we use size instead of size - 1
+        bucket.shiftLeft(index + 1, size)
+        size -= 1
+        buckets.put(componentBits, bucket)
+        bucketSize.put(componentBits, size)
+    }
+
+    /**
+     * @param start start index (inclusive)
+     * @param end end index (inclusive)
+     */
+    private fun IntArray.shiftRight(start: Int, end: Int) {
+        val lastIndex = end + 1
+        require(start >= 0, { "$start should be greater than or equal to 0"})
+        require(lastIndex < size)
+
+        for (i in lastIndex downTo (start + 1)) {
+            this[i] = this[i - 1]
+        }
+    }
+
+    /**
+     * @param start start index (inclusive)
+     * @param end end index (inclusive)
+     */
+    private fun IntArray.shiftLeft(start: Int, end: Int) {
+        val startIndex = start - 1
+        require(startIndex >= 0)
+        require(end < size)
+
+        for (i in startIndex..(end - 1)) {
+            this[i] = this[i + 1]
+        }
     }
 
     private fun getEntities(aspect: Aspect): IntArray {

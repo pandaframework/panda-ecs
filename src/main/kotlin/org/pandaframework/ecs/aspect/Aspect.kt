@@ -5,7 +5,7 @@ import org.pandaframework.ecs.component.ComponentBits
 /**
  * @author Ranie Jade Ramiso
  */
-internal data class Aspect(
+data class Aspect(
     val required: ComponentBits,
     val optional: ComponentBits,
     val excluded: ComponentBits

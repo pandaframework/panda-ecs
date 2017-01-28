@@ -4,7 +4,6 @@ import org.pandaframework.ecs.aspect.AspectBuilder
 import org.pandaframework.ecs.state.State
 import org.pandaframework.ecs.state.StateHandler
 import org.pandaframework.ecs.system.System
-import org.pandaframework.ecs.util.identity.IdentityFactories
 
 // EXAMPLES
 

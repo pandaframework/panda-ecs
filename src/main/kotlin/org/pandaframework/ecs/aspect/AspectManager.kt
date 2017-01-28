@@ -8,7 +8,7 @@ import kotlin.reflect.KClass
 /**
  * @author Ranie Jade Ramiso
  */
-internal class AspectManager(private val componentManager: ComponentManager) {
+class AspectManager(private val componentManager: ComponentManager) {
     fun builder(): AspectBuilder {
         return object: AspectBuilder() {
             private var required = ComponentBits()
