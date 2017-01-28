@@ -45,6 +45,8 @@ dependencyManagement {
     dependencies {
         dependency "com.natpryce:hamkrest:1.1.0.0"
 
+        dependency "com.winterbe:expekt:0.2.0"
+
         dependencySet(group: 'org.junit.platform', version: '1.0.0-M3') {
             entry 'junit-platform-engine'
             entry 'junit-platform-runner'
@@ -81,6 +83,7 @@ dependencies {
 
     testCompile 'com.natpryce:hamkrest'
     testCompile 'org.jetbrains.spek:spek-api'
+    testCompile 'com.winterbe:expekt'
     testCompile 'org.jetbrains.spek:spek-subject-extension'
 
     testRuntime 'org.jetbrains.spek:spek-junit-platform-engine'

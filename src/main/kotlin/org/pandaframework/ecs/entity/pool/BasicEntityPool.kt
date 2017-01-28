@@ -1,6 +1,7 @@
 package org.pandaframework.ecs.entity.pool
 
 import org.pandaframework.ecs.aspect.Aspect
+import org.pandaframework.ecs.component.Component
 import org.pandaframework.ecs.component.ComponentBits
 import org.pandaframework.ecs.component.ComponentManager
 import org.pandaframework.ecs.entity.Entity
@@ -8,6 +9,8 @@ import org.pandaframework.ecs.entity.EntitySubscription
 import org.pandaframework.ecs.entity.EntitySubscriptionListener
 import org.pandaframework.ecs.util.Bits
 import org.pandaframework.ecs.util.identity.IdentityFactories
+import kotlin.reflect.KClass
+import kotlin.reflect.full.primaryConstructor
 
 /**
  * @author Ranie Jade Ramiso
@@ -22,6 +25,7 @@ class BasicEntityPool(private val componentManager: ComponentManager): EntityPoo
     // ComponentBits is implemented as a fly-weight, so it should be memory efficient
     // most of the time, elements of this buffer will point to the same instance
     private var entities = Array<ComponentBits?>(BUFFER_INITIAL, { null })
+    private var entityEditors = Array<EntityEditor?>(BUFFER_INITIAL, { null })
 
     // this will be used to keep track the right most indexed that has a value
     // whenever a large number of entities are destroyed we need to shrink entities
@@ -35,10 +39,10 @@ class BasicEntityPool(private val componentManager: ComponentManager): EntityPoo
     // we use this as an index for faster queries
     // keys are the ComponentBits, while the values are the entities
     // values dynamically grow and shrink just like entities, but shrinking is much simple here.
-    // we just reduce the size of the array using bucketSize (w/c keeps track the number of entities per bucket)
+    // we just reduce the size of the array using bucketSizes (w/c keeps track the number of entities per bucket)
     // shrinking will also leave an allowance, just like entities
     private val buckets = HashMap<ComponentBits, IntArray>()
-    private val bucketSize = HashMap<ComponentBits, Int>()
+    private val bucketSizes = HashMap<ComponentBits, Int>()
 
     // with the setup above
     // create, edit and destroy operations can happen in constant time
@@ -51,7 +55,57 @@ class BasicEntityPool(private val componentManager: ComponentManager): EntityPoo
     }
 
     override fun edit(entity: Entity): EntityEditor {
-        TODO()
+        val index = entity - 1
+        require(index < entities.size, { "Entity '$entity' does not exist"})
+        requireNotNull(entities[index], { "Entity '$entity' does not exist"})
+
+        if (entityEditors[index] == null) {
+            entityEditors[index] = object: EntityEditor {
+                override val entity: Entity
+                    get() = entity
+
+                override fun <T: Component> get(component: KClass<T>): T {
+
+                    return if (!contains(component)) {
+                        val id = componentManager.getId(component)
+                        var bits = entities[index]!!
+                        removeFromBucket(bits, entity)
+
+                        // set the corresponding bit and update state
+                        bits = bits.set(id)
+                        entities[index] = bits
+                        placeInBucket(bits, entity)
+
+                        // TODO: cache
+                        component.primaryConstructor!!.call()
+                    } else {
+                        // TODO: get from cache
+                        component.primaryConstructor!!.call()
+                    }
+                }
+
+                override fun <T: Component> contains(component: KClass<T>): Boolean {
+                    val id  = componentManager.getId(component)
+                    return entities[index]!![id]
+                }
+
+                override fun <T: Component> remove(component: KClass<T>) {
+                    if (!contains(component)) {
+                        val id = componentManager.getId(component)
+                        var bits = entities[index]!!
+                        removeFromBucket(bits, entity)
+
+                        // unset corresponding bit and update state
+                        bits = bits.set(id, false)
+                        entities[index] = bits
+                        placeInBucket(bits, entity)
+                    }
+                }
+
+            }
+        }
+
+        return entityEditors[index]!!
     }
 
     override fun destroy(entity: Entity) {
@@ -82,10 +136,13 @@ class BasicEntityPool(private val componentManager: ComponentManager): EntityPoo
         val index = entity - 1
 
         entities = if (entity > entities.size) {
+            // resize entity editors buffer
+            entityEditors = entityEditors.copyOf(entityEditors.size + BUFFER_GROW)
             entities.copyOf(entities.size + BUFFER_GROW)
         } else {
             entities
         }
+
 
         if (entity > highestIdentity) {
             highestIdentity = entity
@@ -97,7 +154,7 @@ class BasicEntityPool(private val componentManager: ComponentManager): EntityPoo
 
     private fun placeInBucket(componentBits: ComponentBits, entity: Entity) {
         var bucket = buckets.getOrElse(componentBits) { EMPTY_INT_ARRAY.copyOf(BUFFER_INITIAL)}
-        var size = bucketSize.getOrDefault(componentBits, 0)
+        var size = bucketSizes.getOrDefault(componentBits, 0)
 
         bucket = if (size + 1 > bucket.size) {
             bucket.copyOf(bucket.size + BUFFER_GROW)
@@ -117,12 +174,12 @@ class BasicEntityPool(private val componentManager: ComponentManager): EntityPoo
         bucket[index] = entity
         size += 1
         buckets.put(componentBits, bucket)
-        bucketSize.put(componentBits, size)
+        bucketSizes.put(componentBits, size)
     }
 
     private fun removeFromBucket(componentBits: ComponentBits, entity: Entity) {
         val bucket = buckets[componentBits]!!
-        var size = bucketSize[componentBits]!!
+        var size = bucketSizes[componentBits]!!
 
         // entity exists, index is the actual index of the entity
         val index = bucket.binarySearch(entity, 0, size)
@@ -130,10 +187,14 @@ class BasicEntityPool(private val componentManager: ComponentManager): EntityPoo
         // index points to the entity we want to remove
         // since we moved the last entity, its previous index still contains a reference to it. That's
         // why we use size instead of size - 1
-        bucket.shiftLeft(index + 1, size)
+        // we don't shift if the removed item is the last item in the bucket
+        val start = index + 1
+        if (start < size) {
+            bucket.shiftLeft(start, size)
+        }
         size -= 1
         buckets.put(componentBits, bucket)
-        bucketSize.put(componentBits, size)
+        bucketSizes.put(componentBits, size)
     }
 
     /**
@@ -157,7 +218,7 @@ class BasicEntityPool(private val componentManager: ComponentManager): EntityPoo
     private fun IntArray.shiftLeft(start: Int, end: Int) {
         val startIndex = start - 1
         require(startIndex >= 0)
-        require(end < size)
+        require(end <= size, { "$start - $end" })
 
         for (i in startIndex..(end - 1)) {
             this[i] = this[i + 1]
@@ -173,9 +234,10 @@ class BasicEntityPool(private val componentManager: ComponentManager): EntityPoo
         return if (filtered.isEmpty()) {
             EMPTY_INT_ARRAY
         } else {
-            filtered.values.reduce { base, next ->
-                base.copyOf(base.size + next.size).apply {
-                    System.arraycopy(next, 0, this, base.size, next.size)
+            filtered.entries.fold(EMPTY_INT_ARRAY) { base, entry ->
+                val bucketSize = bucketSizes[entry.key]!!
+                base.copyOf(base.size + bucketSize).apply {
+                    System.arraycopy(entry.value, 0, this, base.size, bucketSize)
                 }
             }
         }
