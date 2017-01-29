@@ -13,4 +13,6 @@ interface EntityEditor {
     fun <T: Component> get(component: KClass<T>): T
     fun <T: Component> contains(component: KClass<T>): Boolean
     fun <T: Component> remove(component: KClass<T>)
+
+    fun cleanup()
 }

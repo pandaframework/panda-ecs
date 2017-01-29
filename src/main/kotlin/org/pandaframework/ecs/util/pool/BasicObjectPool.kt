@@ -1,11 +1,11 @@
 package org.pandaframework.ecs.util.pool
 
-import java.util.*
+import java.util.HashSet
 
 /**
  * @author Ranie Jade Ramiso
  */
-class BasicObjectPool<T>(val keepAlive: Int, val factory: () -> T): ObjectPool<T> {
+class BasicObjectPool<T: Any>(val keepAlive: Int, val factory: () -> T): ObjectPool<T> {
     private val limbo: MutableSet<T> = HashSet()
     private val live: MutableSet<T> = HashSet()
 

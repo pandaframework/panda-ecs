@@ -20,9 +20,10 @@ apply plugin: "idea"
 
 repositories {
     mavenCentral()
-    maven {
-        url "https://dl.bintray.com/jetbrains/spek"
-    }
+    mavenLocal()
+//    maven {
+//        url "https://dl.bintray.com/jetbrains/spek"
+//    }
     maven {
         url "https://dl.bintray.com/kotlin/kotlin-eap-1.1"
     }

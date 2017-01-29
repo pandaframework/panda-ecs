@@ -9,6 +9,8 @@ import org.pandaframework.ecs.entity.EntitySubscription
 import org.pandaframework.ecs.entity.EntitySubscriptionListener
 import org.pandaframework.ecs.util.Bits
 import org.pandaframework.ecs.util.identity.IdentityFactories
+import org.pandaframework.ecs.util.pool.BasicObjectPool
+import org.pandaframework.ecs.util.pool.ObjectPool
 import kotlin.reflect.KClass
 import kotlin.reflect.full.primaryConstructor
 
@@ -44,6 +46,8 @@ class BasicEntityPool(private val componentManager: ComponentManager): EntityPoo
     private val buckets = HashMap<ComponentBits, IntArray>()
     private val bucketSizes = HashMap<ComponentBits, Int>()
 
+    private val pools = mutableMapOf<KClass<out Component>, ObjectPool<Any>>()
+
     // with the setup above
     // create, edit and destroy operations can happen in constant time
     // except for cases were we need to grow and/or shrink the internal buffers.
@@ -61,6 +65,8 @@ class BasicEntityPool(private val componentManager: ComponentManager): EntityPoo
 
         if (entityEditors[index] == null) {
             entityEditors[index] = object: EntityEditor {
+                private val componentInstances = mutableMapOf<KClass<out Component>, Component>()
+
                 override val entity: Entity
                     get() = entity
 
@@ -76,11 +82,16 @@ class BasicEntityPool(private val componentManager: ComponentManager): EntityPoo
                         entities[index] = bits
                         placeInBucket(bits, entity)
 
-                        // TODO: cache
-                        component.primaryConstructor!!.call()
+                        val pool = pools.getOrPut(
+                            component, { BasicObjectPool(100, { component.primaryConstructor!!.call() }) }
+                        ) as ObjectPool<T>
+
+                        pool.acquire().apply {
+                            componentInstances.put(component, this)
+                        }
+
                     } else {
-                        // TODO: get from cache
-                        component.primaryConstructor!!.call()
+                        return componentInstances[component] as T
                     }
                 }
 
@@ -102,6 +113,11 @@ class BasicEntityPool(private val componentManager: ComponentManager): EntityPoo
                     }
                 }
 
+                override fun cleanup() {
+                    componentInstances.entries.forEach {
+                        pools[it.key]!!.release(it.value)
+                    }
+                }
             }
         }
 
@@ -114,6 +130,8 @@ class BasicEntityPool(private val componentManager: ComponentManager): EntityPoo
         requireNotNull(entities[index], { "Entity '$entity' does not exist"})
         removeFromBucket(entities[index]!!, entity)
         entities[index] = null
+        entityEditors[index]!!.cleanup()
+        entityEditors[index] = null
         identityFactory.free(entity)
     }
 

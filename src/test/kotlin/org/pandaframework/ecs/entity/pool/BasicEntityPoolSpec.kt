@@ -1,9 +1,9 @@
 package org.pandaframework.ecs.entity.pool
 
 import com.natpryce.hamkrest.assertion.assertThat
-import com.natpryce.hamkrest.equalTo
 import com.natpryce.hamkrest.throws
-import org.jetbrains.spek.api.dsl.context
+import com.winterbe.expekt.expect
+import org.jetbrains.spek.api.dsl.describe
 import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.subject.SubjectSpek
 import org.pandaframework.ecs.component.ComponentManager
@@ -15,13 +15,23 @@ object BasicEntityPoolSpec: SubjectSpek<BasicEntityPool>({
     val componentManager = memoized { ComponentManager() }
     subject { BasicEntityPool(componentManager()) }
 
-    context("creating entities") {
+    describe("creating entities") {
         it("there should be no duplicates") {
-            assertThat(subject.create(), !equalTo(subject.create()))
+            expect(subject.create()).not.equal(subject.create())
         }
     }
 
-    context("destroying entities") {
+    describe("editing entities") {
+        it("should return the same editor instance") {
+            val entity = subject.create()
+            expect(subject.edit(entity)).satisfy {
+                it === subject.edit(entity)
+            }
+        }
+    }
+
+
+    describe("destroying entities") {
         it("should only destroy if entity exists") {
             assertThat({
                 subject.destroy(666)
