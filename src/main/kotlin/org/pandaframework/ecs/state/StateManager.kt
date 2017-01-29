@@ -5,8 +5,8 @@ import org.pandaframework.ecs.entity.EntityManager
 /**
  * @author Ranie Jade Ramiso
  */
-class StateManager<T: State>(private val entityManager: EntityManager,
-                             private val handlers: Map<T, StateHandler<*>>) {
+class StateManager<T: State>(internal val entityManager: EntityManager,
+                             internal val handlers: Map<T, StateHandler<*>>) {
 
     private var currentState: T? = null
     private var nextState: T? = null

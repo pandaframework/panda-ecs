@@ -1,4 +1,6 @@
-package org.pandaframework.ecs.state
+package org.pandaframework.ecs
+
+import org.pandaframework.ecs.state.State
 
 /**
  * @author Ranie Jade Ramiso
