@@ -11,24 +11,47 @@ typealias Entity = Int
 /**
  * @author Ranie Jade Ramiso
  */
-class EntityManager internal constructor(
-    private val aspectManager: AspectManager,
-    private val entityPool: EntityPool
-) {
+class EntityManager constructor(private val aspectManager: AspectManager,
+                                private val entityPool: EntityPool) {
+
+    private val mapperInstances = mutableMapOf<KClass<out Component>, Mapper<*>>()
+
     fun create(): Entity {
-        TODO()
+        return entityPool.create()
     }
 
     fun destroy(entity: Entity) {
-        TODO()
+        entityPool.destroy(entity)
     }
 
+    @Suppress("unchecked_cast")
     fun <T: Component> mapper(component: KClass<T>): Mapper<T> {
-        TODO()
+        return mapperInstances.getOrPut(component) {
+            object: Mapper<T> {
+                override fun get(entity: Entity): T {
+                    return entityPool.edit(entity)
+                        .get(component)
+                }
+
+                override fun contains(entity: Entity): Boolean {
+                    return entityPool.edit(entity)
+                        .contains(component)
+                }
+
+                override fun remove(entity: Entity) {
+                    entityPool.edit(entity)
+                        .remove(component)
+                }
+
+            }
+        } as Mapper<T>
     }
 
     fun blueprint(block: BlueprintBuilder.() -> Unit): Blueprint {
-        TODO()
+        return with(BlueprintBuilder(entityPool)) {
+            block(this)
+            build()
+        }
     }
 
     internal fun subscribe(block: AspectBuilder.() -> Unit): EntitySubscription {

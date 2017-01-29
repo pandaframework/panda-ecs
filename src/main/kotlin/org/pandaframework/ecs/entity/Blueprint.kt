@@ -1,6 +1,7 @@
 package org.pandaframework.ecs.entity
 
 import org.pandaframework.ecs.component.Component
+import org.pandaframework.ecs.entity.pool.EntityPool
 import kotlin.reflect.KClass
 
 /**
@@ -8,10 +9,10 @@ import kotlin.reflect.KClass
  */
 interface Blueprint {
     fun create(): Entity
-    fun transmute(entity: Entity)
+    // TODO: fun transmute(entity: Entity)
 }
 
-class BlueprintBuilder(val entityManager: EntityManager) {
+class BlueprintBuilder(val entityPool: EntityPool) {
     private val components = mutableListOf<KClass<out Component>>()
 
     inline fun <reified T: Component> component() {
@@ -25,12 +26,12 @@ class BlueprintBuilder(val entityManager: EntityManager) {
 
     internal fun build(): Blueprint {
         return object: Blueprint {
-            override fun transmute(entity: Entity) {
-                TODO()
-            }
-
             override fun create(): Entity {
-                TODO()
+                val entity = entityPool.create()
+                entityPool.edit(entity).apply {
+                    components.forEach { get(it) }
+                }
+                return entity
             }
         }
     }

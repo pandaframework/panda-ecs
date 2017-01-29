@@ -70,13 +70,14 @@ dependencyManagement {
             }
         }
 
+        dependency "com.nhaarman:mockito-kotlin:1.2.0"
+
         dependencySet(group: 'org.jetbrains.kotlin', version: ext.kotlinVersion) {
             entry 'kotlin-stdlib'
             entry 'kotlin-reflect'
         }
     }
 }
-
 
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib"
@@ -85,6 +86,7 @@ dependencies {
     testCompile 'com.natpryce:hamkrest'
     testCompile 'org.jetbrains.spek:spek-api'
     testCompile 'com.winterbe:expekt'
+    testCompile 'com.nhaarman:mockito-kotlin'
     testCompile 'org.jetbrains.spek:spek-subject-extension'
 
     testRuntime 'org.jetbrains.spek:spek-junit-platform-engine'
