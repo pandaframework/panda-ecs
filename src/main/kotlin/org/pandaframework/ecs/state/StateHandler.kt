@@ -1,6 +1,10 @@
 package org.pandaframework.ecs.state
 
+import org.pandaframework.ecs.component.Component
+import org.pandaframework.ecs.entity.Blueprint
+import org.pandaframework.ecs.entity.BlueprintBuilder
 import org.pandaframework.ecs.entity.EntityManager
+import org.pandaframework.ecs.entity.Mapper
 
 /**
  * @author Ranie Jade Ramiso
@@ -14,4 +18,14 @@ abstract class StateHandler<T: State> {
 
     abstract fun setup()
     abstract fun cleanup()
+
+    protected inline fun <reified T: Component> mapper(): Lazy<Mapper<T>> {
+        return lazy {
+            entityManager.mapper(T::class)
+        }
+    }
+
+    protected fun blueprint(block: BlueprintBuilder.() -> Unit): Lazy<Blueprint> {
+        return lazy { entityManager.blueprint(block) }
+    }
 }

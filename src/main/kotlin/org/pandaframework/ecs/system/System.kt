@@ -1,10 +1,14 @@
 package org.pandaframework.ecs.system
 
 import org.pandaframework.ecs.aspect.AspectBuilder
+import org.pandaframework.ecs.component.Component
+import org.pandaframework.ecs.entity.Blueprint
+import org.pandaframework.ecs.entity.BlueprintBuilder
 import org.pandaframework.ecs.entity.Entity
 import org.pandaframework.ecs.entity.EntityManager
 import org.pandaframework.ecs.entity.EntitySubscription
 import org.pandaframework.ecs.entity.EntitySubscriptionListener
+import org.pandaframework.ecs.entity.Mapper
 import org.pandaframework.ecs.state.State
 import org.pandaframework.ecs.state.StateManager
 import kotlin.properties.Delegates
@@ -35,6 +39,16 @@ abstract class System<T: State>: EntitySubscriptionListener {
     override fun removed(entity: Entity) { }
 
     fun subscription() = subscription
+
+    protected inline fun <reified T: Component> mapper(): Lazy<Mapper<T>> {
+        return lazy {
+            entityManager.mapper(T::class)
+        }
+    }
+
+    protected fun blueprint(block: BlueprintBuilder.() -> Unit): Lazy<Blueprint> {
+        return lazy { entityManager.blueprint(block) }
+    }
 
     internal fun bootstrap() {
         subscription = entityManager.subscribe {
