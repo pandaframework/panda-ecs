@@ -20,6 +20,7 @@ abstract class System<T: State>: EntitySubscriptionListener {
     internal lateinit var _entityManager: EntityManager
     internal lateinit var _stateManager: StateManager<T>
     private var subscription: EntitySubscription by Delegates.notNull()
+    private val updateStrategy by lazy { updateStrategy() }
 
     val entityManager: EntityManager by lazy { _entityManager }
     val stateManager: StateManager<T> by lazy { _stateManager }
@@ -30,7 +31,9 @@ abstract class System<T: State>: EntitySubscriptionListener {
 
     open fun setup() { }
 
-    open fun update(time: Double) { }
+    internal fun update(time: Double) {
+        updateStrategy.update(time)
+    }
 
     open fun cleanup() { }
 
@@ -39,6 +42,8 @@ abstract class System<T: State>: EntitySubscriptionListener {
     override fun removed(entity: Entity) { }
 
     fun subscription() = subscription
+
+    protected abstract fun updateStrategy(): UpdateStrategy
 
     protected inline fun <reified T: Component> mapper(): Lazy<Mapper<T>> {
         return lazy {

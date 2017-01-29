@@ -10,8 +10,8 @@ import org.jetbrains.spek.api.dsl.describe
 import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
 import org.jetbrains.spek.subject.SubjectSpek
-import org.pandaframework.ecs.TestState
 import org.pandaframework.ecs.entity.EntityManager
+import org.pandaframework.ecs.support.TestState
 
 /**
  * @author Ranie Jade Ramiso
@@ -20,6 +20,7 @@ object StateTransitionSpec: SubjectSpek<StateManager<TestState>>({
     val state1Handler = memoized { mock<StateHandler<TestState.State1>>() }
     val state2Handler = memoized { mock<StateHandler<TestState.State2>>() }
     val entityManager = memoized { mock<EntityManager>() }
+
     subject {
         StateManager(
             entityManager(),
@@ -56,8 +57,6 @@ object StateTransitionSpec: SubjectSpek<StateManager<TestState>>({
             subject.transitionTo(TestState.State1)
             subject.process()
         }
-
-        afterEachTest { subject.cleanup() }
 
         on("change state") {
             subject.transitionTo(TestState.State2)

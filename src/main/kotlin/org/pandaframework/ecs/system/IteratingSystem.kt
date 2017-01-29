@@ -1,17 +1,20 @@
 package org.pandaframework.ecs.system
 
 import org.pandaframework.ecs.entity.Entity
-import org.pandaframework.ecs.state.State
 
 /**
  * @author Ranie Jade Ramiso
  */
-abstract class IteratingSystem<T: State>: System<T>() {
-    override final fun update(time: Double) {
-        subscription().entities().forEach {
-            update(time, it)
-        }
-    }
+interface IteratingSystem {
+    fun update(time: Double, entity: Entity)
+}
 
-    protected abstract fun update(time: Double, entity: Entity)
+
+class IteratingUpdateStrategy<out T>(val system: T): UpdateStrategy
+    where T: IteratingSystem, T: System<*> {
+
+    override fun update(time: Double) {
+        system.subscription().entities()
+            .forEach { system.update(time, it) }
+    }
 }

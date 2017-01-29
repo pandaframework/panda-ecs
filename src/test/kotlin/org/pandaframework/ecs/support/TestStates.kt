@@ -1,4 +1,4 @@
-package org.pandaframework.ecs
+package org.pandaframework.ecs.support
 
 import org.pandaframework.ecs.state.State
 

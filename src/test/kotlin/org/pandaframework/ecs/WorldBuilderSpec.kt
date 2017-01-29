@@ -7,10 +7,9 @@ import com.winterbe.expekt.expect
 import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
 import org.jetbrains.spek.subject.SubjectSpek
-import org.pandaframework.ecs.aspect.AspectBuilder
-import org.pandaframework.ecs.entity.Entity
 import org.pandaframework.ecs.state.StateHandler
-import org.pandaframework.ecs.system.IteratingSystem
+import org.pandaframework.ecs.support.TestState
+import org.pandaframework.ecs.support.TestSystem
 
 /**
  * @author Ranie Jade Ramiso
@@ -27,14 +26,7 @@ object WorldBuilderSpec: SubjectSpek<WorldBuilder<TestState>>({
     on("build") {
         val state1Handler = mock<StateHandler<TestState.State1>>()
         val state2Handler = mock<StateHandler<TestState.State2>>()
-        val system = object: IteratingSystem<TestState>() {
-            override val supportedStates: Array<TestState>
-                get() = arrayOf(TestState.State1)
-
-            override fun AspectBuilder.aspect() { }
-
-            override fun update(time: Double, entity: Entity) { }
-        }
+        val system = object: TestSystem() { }
 
         subject.initialState(TestState.State1)
         subject.registerStateHandler(TestState.State1, state1Handler)
