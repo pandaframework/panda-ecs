@@ -28,7 +28,12 @@ class World<T: State>(val entityManager: EntityManager,
 
     fun update(time: Double) {
         stateManager.process()
-        systems.forEach { it.update(time) }
+
+        systems
+            .filter {
+                it.supportedStates.isEmpty() or it.supportedStates.contains(stateManager.currentState())
+            }
+            .forEach { it.update(time) }
     }
 
     fun cleanup() {
