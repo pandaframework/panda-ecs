@@ -1,33 +1,52 @@
 package org.pandaframework.ecs.state
 
+import org.pandaframework.ecs.entity.EntityManager
+
 /**
  * @author Ranie Jade Ramiso
  */
-class StateManager<T: State>(internal val states: Map<T, StateHandler<*>>) {
+class StateManager<T: State>(private val entityManager: EntityManager,
+                             private val handlers: Map<T, StateHandler<*>>) {
 
     private var currentState: T? = null
+    private var nextState: T? = null
 
-    fun setState(state: T) {
-        if (currentState != null) {
-            if (state == currentState) {
-                throw IllegalArgumentException("Already in $state.")
+    internal fun setup() {
+        handlers.forEach {
+            it.value._entityManager = entityManager
+            it.value._stateManager = this
+        }
+    }
+
+    internal fun process() {
+        if (nextState != null) {
+            if (currentState != null) {
+                cleanupState(currentState!!)
             }
 
-            cleanupState(state)
+            currentState = nextState
+            nextState = null
+            setupState(currentState!!)
         }
+    }
 
-        currentState = state
-        setupState(state)
+    internal fun cleanup() {
+        cleanupState(currentState())
+    }
+
+    fun transitionTo(state: T) {
+        require(currentState != state, { "Already in state: $state" })
+        nextState = state
     }
 
     fun currentState(): T = currentState!!
 
 
     private fun setupState(state: T) {
-        states.getValue(state).setup()
+        handlers.getValue(state).setup()
     }
 
     private fun cleanupState(state: T) {
-        states.getValue(state).cleanup()
+        handlers.getValue(state).cleanup()
     }
 }

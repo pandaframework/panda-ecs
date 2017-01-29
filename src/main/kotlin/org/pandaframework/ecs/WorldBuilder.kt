@@ -23,6 +23,7 @@ inline fun <reified T: State> createWorld(block: WorldBuilder<T>.() -> Unit): Wo
 class WorldBuilder<T: State> internal @PublishedApi constructor() {
     private val systems = mutableListOf<System<T>>()
     private val stateHandlers = HashMap<T, StateHandler<*>>()
+    private var initialState: T? = null
 
     fun <S: System<T>> registerSystem(system: S) {
         systems.add(system)
@@ -32,8 +33,13 @@ class WorldBuilder<T: State> internal @PublishedApi constructor() {
         stateHandlers.put(state, handler)
     }
 
+    fun <S: T> initialState(state: S) {
+        initialState = state
+    }
+
     @PublishedApi
     internal fun build(): World<T> {
+        requireNotNull(initialState)
 
         val componentManager = ComponentManager()
         val aspectManager = AspectManager(componentManager)
@@ -42,8 +48,8 @@ class WorldBuilder<T: State> internal @PublishedApi constructor() {
         val entityManager = EntityManager(
             aspectManager, entityPool
         )
-        val stateManager = StateManager(stateHandlers)
+        val stateManager = StateManager(entityManager, stateHandlers)
 
-        return World(entityManager, stateManager, systems)
+        return World(entityManager, stateManager, initialState!!, systems)
     }
 }

@@ -10,17 +10,16 @@ import org.pandaframework.ecs.system.System
  */
 class World<T: State>(val entityManager: EntityManager,
                       val stateManager: StateManager<T>,
-                      private val systems: List<System<T>>) {
+                      val initialState: T,
+                      val systems: List<System<T>>) {
 
     fun setup() {
+        stateManager.setup()
+        stateManager.transitionTo(initialState)
+
         systems.forEach {
             it._entityManager = entityManager
             it._stateManager = stateManager
-
-            stateManager.states.values.forEach {
-                it._entityManager = entityManager
-                it._stateManager = stateManager
-            }
 
             it.bootstrap()
             it.setup()
@@ -28,10 +27,12 @@ class World<T: State>(val entityManager: EntityManager,
     }
 
     fun update(time: Double) {
+        stateManager.process()
         systems.forEach { it.update(time) }
     }
 
     fun cleanup() {
         systems.forEach(System<T>::cleanup)
+        stateManager.cleanup()
     }
 }
