@@ -78,6 +78,32 @@ dependencyManagement {
     }
 }
 
+configurations {
+    integrationTestCompile {
+        extendsFrom testCompile
+    }
+
+    integrationTestRuntime {
+        extendsFrom testRuntime
+    }
+}
+
+sourceSets {
+    integrationTest {
+        kotlin {
+            srcDirs += 'src/integrationTest/kotlin'
+        }
+        compileClasspath += sourceSets.main.output
+    }
+}
+
+idea {
+    module {
+        sourceDirs -= file('src/integrationTest/kotlin')
+        testSourceDirs += file('src/integrationTest/kotlin')
+    }
+}
+
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib"
     compile "org.jetbrains.kotlin:kotlin-reflect"
