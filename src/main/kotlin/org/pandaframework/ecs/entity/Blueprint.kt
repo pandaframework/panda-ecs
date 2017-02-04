@@ -15,12 +15,12 @@ interface Blueprint {
 class BlueprintBuilder(val entityPool: EntityPool) {
     private val components = mutableListOf<KClass<out Component>>()
 
-    inline fun <reified T: Component> component() {
-        component(T::class)
+    inline fun <reified T: Component> withComponent() {
+        withComponent(T::class)
     }
 
     @PublishedApi
-    internal fun <T: Component> component(component: KClass<T>) {
+    internal fun <T: Component> withComponent(component: KClass<T>) {
         components.add(component)
     }
 

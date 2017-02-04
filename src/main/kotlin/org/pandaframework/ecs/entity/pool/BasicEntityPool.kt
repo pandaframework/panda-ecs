@@ -83,7 +83,7 @@ class BasicEntityPool(private val componentManager: ComponentManager): EntityPoo
                         placeInBucket(bits, entity)
 
                         val pool = pools.getOrPut(
-                            component, { BasicObjectPool(100, { component.primaryConstructor!!.call() }) }
+                            component, { BasicObjectPool(100, { component.primaryConstructor!!.callBy(emptyMap()) }) }
                         ) as ObjectPool<T>
 
                         pool.acquire().apply {
@@ -138,11 +138,11 @@ class BasicEntityPool(private val componentManager: ComponentManager): EntityPoo
     override fun subscribe(aspect: Aspect): EntitySubscription {
         return object: EntitySubscription {
             override fun addListener(listener: EntitySubscriptionListener) {
-                TODO()
+                // TODO()
             }
 
             override fun removeListener(listener: EntitySubscriptionListener) {
-                TODO()
+                // TODO()
             }
 
             override fun entities() = getEntities(aspect)
