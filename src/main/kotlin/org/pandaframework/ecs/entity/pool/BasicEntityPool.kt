@@ -48,6 +48,8 @@ class BasicEntityPool(private val componentManager: ComponentManager): EntityPoo
 
     private val pools = mutableMapOf<KClass<out Component>, ObjectPool<Any>>()
 
+    private val subscriptions = HashMap<Aspect, EntitySubscriptionImpl>()
+
     // with the setup above
     // create, edit and destroy operations can happen in constant time
     // except for cases were we need to grow and/or shrink the internal buffers.
@@ -82,11 +84,7 @@ class BasicEntityPool(private val componentManager: ComponentManager): EntityPoo
                         entities[index] = bits
                         placeInBucket(bits, entity)
 
-                        val pool = pools.getOrPut(
-                            component, { BasicObjectPool(100, { component.primaryConstructor!!.callBy(emptyMap()) }) }
-                        ) as ObjectPool<T>
-
-                        pool.acquire().apply {
+                        getPool(component).acquire().apply {
                             componentInstances.put(component, this)
                         }
 
@@ -95,16 +93,24 @@ class BasicEntityPool(private val componentManager: ComponentManager): EntityPoo
                     }
                 }
 
+                private fun <T: Component> getPool(component: KClass<T>): ObjectPool<T> {
+                    return pools.getOrPut(
+                        component, { BasicObjectPool(100, { component.primaryConstructor!!.callBy(emptyMap()) }) }
+                    ) as ObjectPool<T>
+                }
+
                 override fun <T: Component> contains(component: KClass<T>): Boolean {
                     val id  = componentManager.getId(component)
                     return entities[index]!![id]
                 }
 
                 override fun <T: Component> remove(component: KClass<T>) {
-                    if (!contains(component)) {
+                    if (contains(component)) {
                         val id = componentManager.getId(component)
                         var bits = entities[index]!!
                         removeFromBucket(bits, entity)
+                        val instance = componentInstances.remove(component)
+                        getPool(component).release(instance as T)
 
                         // unset corresponding bit and update state
                         bits = bits.set(id, false)
@@ -136,17 +142,7 @@ class BasicEntityPool(private val componentManager: ComponentManager): EntityPoo
     }
 
     override fun subscribe(aspect: Aspect): EntitySubscription {
-        return object: EntitySubscription {
-            override fun addListener(listener: EntitySubscriptionListener) {
-                // TODO()
-            }
-
-            override fun removeListener(listener: EntitySubscriptionListener) {
-                // TODO()
-            }
-
-            override fun entities() = getEntities(aspect)
-        }
+        return subscriptions.getOrPut(aspect) { EntitySubscriptionImpl(aspect)}
     }
 
     private fun trackEntity(entity: Entity) {
@@ -193,6 +189,10 @@ class BasicEntityPool(private val componentManager: ComponentManager): EntityPoo
         size += 1
         buckets.put(componentBits, bucket)
         bucketSizes.put(componentBits, size)
+
+        notifyListeners(componentBits) {
+            it.added(entity)
+        }
     }
 
     private fun removeFromBucket(componentBits: ComponentBits, entity: Entity) {
@@ -213,6 +213,16 @@ class BasicEntityPool(private val componentManager: ComponentManager): EntityPoo
         size -= 1
         buckets.put(componentBits, bucket)
         bucketSizes.put(componentBits, size)
+
+        notifyListeners(componentBits) {
+            it.removed(entity)
+        }
+    }
+
+    private inline fun notifyListeners(componentBits: ComponentBits,
+                                       crossinline notify: (EntitySubscriptionListener) -> Unit) {
+        subscriptions.filter { it.key.match(componentBits) }
+            .forEach { _, subscription -> subscription.listeners.forEach { notify(it) } }
     }
 
     /**
@@ -260,6 +270,20 @@ class BasicEntityPool(private val componentManager: ComponentManager): EntityPoo
             }
         }
 
+    }
+
+    private inner class EntitySubscriptionImpl(val aspect: Aspect): EntitySubscription {
+        val listeners = mutableListOf<EntitySubscriptionListener>()
+
+        override fun addListener(listener: EntitySubscriptionListener) {
+            listeners.add(listener)
+        }
+
+        override fun removeListener(listener: EntitySubscriptionListener) {
+            listeners.remove(listener)
+        }
+
+        override fun entities() = getEntities(aspect)
     }
 
     companion object {

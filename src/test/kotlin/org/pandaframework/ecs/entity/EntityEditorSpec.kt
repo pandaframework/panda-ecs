@@ -44,15 +44,17 @@ object EntityEditorSpec: SubjectSpek<EntityPool>({
     }
 
     on("component removal") {
-        val entity = subject.create()
+        val entity = subject.create().apply {
+            with(subject.edit(this)) {
+                get(Component2::class)
+            }
+        }
 
         subject.edit(entity).apply {
-            expect(get(Component2::class)).not.`null`
-
             remove(Component2::class)
 
             it("contains should return false") {
-                expect(contains(Component2::class)).to.be.`true`
+                expect(contains(Component2::class)).to.be.`false`
             }
         }
 

@@ -37,7 +37,7 @@ abstract class System<T: State>: EntitySubscriptionListener {
 
     open fun cleanup() { }
 
-    override fun inserted(entity: Entity) { }
+    override fun added(entity: Entity) { }
 
     override fun removed(entity: Entity) { }
 
