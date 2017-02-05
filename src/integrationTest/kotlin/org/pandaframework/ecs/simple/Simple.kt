@@ -101,15 +101,13 @@ class SimpleSpec: SubjectSpek<World<GameState>>({
     }
 
     afterGroup {
-        subject.cleanup()
+        // TODO: https://github.com/JetBrains/spek/issues/178
+        // subject.cleanup()
     }
 
     on("update") {
-        try {
-            subject.update(5.0)
-        } catch (e: Throwable) {
-            e.printStackTrace()
-        }
+        subject.update(5.0)
+
 
         it("there should be no entities in the origin") {
             with(initialStateHandler()) {
