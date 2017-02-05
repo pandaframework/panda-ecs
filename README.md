@@ -1,4 +1,4 @@
 # panda-ecs
-[![Build Status](https://travis-ci.org/pandaframework/panda-ecs.svg?branch=master)](https://travis-ci.org/pandaframework/panda-ecs) [![codecov.io](https://codecov.io/github/pandaframework/panda-ecs/coverage.svg?branch=master)](https://codecov.io/github/pandaframework/panda-ecs?branch=master)
+[![Build Status](https://travis-ci.org/pandaframework/panda-ecs.svg?branch=master)](https://travis-ci.org/pandaframework/panda-ecs) [![Release](https://jitpack.io/v/org.pandaframework/panda-ecs.svg)](https://jitpack.io/#org.pandaframework/panda-ecs)
 
 Entity Component System Framework
